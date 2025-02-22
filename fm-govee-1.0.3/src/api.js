@@ -105,12 +105,13 @@ module.exports = {
 			devices.push(selectDeviceObj);
 
 			for (let i = 0; i < data.length; i++) {
-				let deviceObj = {...data[i]};
-				deviceObj.id = data[i].device;
-				deviceObj.label = `${data[i].deviceName} (${data[i].sku})`;
-				deviceObj.sku = data[i].sku;
+        let deviceObj = { ...data[i] };
+        deviceObj.id = data[i].device;
+        deviceObj.label = `${data[i].deviceName} (${data[i].sku})`;
+        deviceObj.sku = data[i].sku;
+
         devices.push(deviceObj);
-			}
+      }
 
 			let manualDeviceObj = {};
 			manualDeviceObj.id = 'manual';
@@ -132,13 +133,36 @@ module.exports = {
 			//loop through govee devices, find ours, and grab its data
 			let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
 			if (goveeDevice) {
-				let variableObj = {
-					'device': goveeDevice.device,
-					'sku': goveeDevice.sku,
-					'device_name': goveeDevice.deviceName,
-				};
-				self.setVariableValues(variableObj);
-			}
+        // Loop through capabilities to find colorTemperatureK
+        for (let capabilities of goveeDevice.capabilities) {
+          if (capabilities.instance === "colorTemperatureK") {
+            goveeDevice.minkelvin = capabilities.parameters.range.min;
+            goveeDevice.maxkelvin = capabilities.parameters.range.max;
+          }
+          // getting the max segments
+          else if (capabilities.type === "devices.capabilities.segment_color_setting") {
+            for (let field of capabilities.parameters.fields) {
+              if (field.fieldName === "segment" && field.size) {
+                goveeDevice.maxsegments = field.size.max;
+              }
+            }
+          }
+        }
+
+        let variableObj = {
+          'device': goveeDevice.device,
+          'sku': goveeDevice.sku,
+          'device_name': goveeDevice.deviceName,
+          'minkelvin': goveeDevice.minkelvin ?? 2000,
+          'maxkelvin': goveeDevice.maxkelvin ?? 6500,
+          'maxsegments': goveeDevice.maxsegments ?? 0
+        };
+        self.setVariableValues(variableObj);
+        self.initActions();
+        self.INFO.minkelvin = goveeDevice.minkelvin;
+        self.INFO.maxkelvin = goveeDevice.maxkelvin;
+        self.INFO.maxsegments = goveeDevice.maxsegments;
+      }
 			else {
 				self.log('error', `Invalid Govee Device Selected: ${mac}`);
 			}

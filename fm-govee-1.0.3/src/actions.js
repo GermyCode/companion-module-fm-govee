@@ -110,7 +110,6 @@ module.exports = {
 				}
 			}
 		}
-		
     actions.changeColor = {
       name: 'Change Color',
       options: [
@@ -134,16 +133,19 @@ module.exports = {
         },
         {
           type: 'number',
-          id: 'colorkelvin',
-          label: 'Kelvin Temperature (2200-6500)',
-          default: 4000,
-          min: 2200,
-          max: 6500,
-          required: true,
-          isVisible: (options) => options.colortype === 'kelvin' // Only show if Kelvin is selected
-        }
+            id: 'colorkelvin',
+            label: `Kelvin Temperature (${self.getVariableValue('minkelvin')} - ${self.getVariableValue('maxkelvin')})`,
+            default: 3000,
+            min: parseInt(self.getVariableValue('minkelvin')) || 2000, // Fallback if undefined
+            max: parseInt(self.getVariableValue('maxkelvin')) || 6500, // Fallback if undefined
+            required: true,
+            isVisible: (options) => options.colortype === 'kelvin' // Only show if Kelvin is selected
+          },
       ],
       callback: async function (action) {
+        if (actions.changeColor.options.colortype === 'kelvin') {
+          actions.changeColor.options.colorkelvin.label = 'Kelvin Temperature (' + self.INFO.minkelvin + '-' + self.INFO.maxkelvin + ')';
+        }
         let option = action.options;
         if (option.colortype === 'rgb') {
           let color = splitRgb(action.options.colorrgb);
@@ -151,7 +153,7 @@ module.exports = {
             let hex = colorsys.rgbToHex(color.r, color.g, color.b);
             self.GOVEE.setColor(hex).then((data) => {
               self.INFO.power = 'on';
-              self.INFO.color = '(' + color.r + ', ' + color.g + ', ' + color.b + ')';
+              self.INFO.color = '(R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')';
               self.checkVariables();
               self.checkFeedbacks();
             }).catch((error) => {
@@ -163,13 +165,13 @@ module.exports = {
             self.log('error', 'Error changing color: ' + error.toString());
           }
           if (self.config.verbose) {
-            self.log('info', 'Setting color to (' + color.r + ', ' + color.g + ', ' + color.b + ')');
+            self.log('info', 'Setting color to (R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')');
           }
         } 
         else if (option.colortype === 'kelvin') {
           let kelvin = action.options.colorkelvin;
           try {
-            self.GOVEE.setColorTemperature(kelvin).then((data) => {
+            self.GOVEE.setColorTemperature(kelvin, self.INFO).then((data) => {
               self.INFO.power = 'on';
               self.INFO.color = kelvin + "K";
               self.checkVariables();
@@ -188,16 +190,17 @@ module.exports = {
         }
       }
     }
-/*
+    /*
     actions.segments = {
       name: 'Change Segment',
       options: [
         {
 					type: 'number',
-					label: 'Number of segments',
+					label: 'Number of segments: max ' + self.INFO.maxsegments,
 					id: 'numofseg',
 					default: 0,
           min: 0,
+          max: self.INFO.maxsegments
 					required: true,
 				},
         {
@@ -247,7 +250,7 @@ module.exports = {
             let hex = colorsys.rgbToHex(color.r, color.g, color.b);
             self.GOVEE.setColor(hex).then((data) => {
               self.INFO.power = 'on';
-              self.INFO.color = '(' + color.r + ', ' + color.g + ', ' + color.b + ')';
+              self.INFO.color = '(R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')';
               self.checkVariables();
               self.checkFeedbacks();
             }).catch((error) => {
@@ -259,13 +262,13 @@ module.exports = {
             self.log('error', 'Error changing color: ' + error.toString());
           }
           if (self.config.verbose) {
-            self.log('info', 'Setting color to (' + color.r + ', ' + color.g + ', ' + color.b + ')');
+            self.log('info', 'Setting color to (R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')');
           }
         } 
         else if (option.colortype === 'kelvin') {
           let kelvin = action.options.colorkelvin;
           try {
-            self.GOVEE.setColorTemperature(kelvin).then((data) => {
+            self.GOVEE.setColorTemperature(kelvin, self.INFO).then((data) => {
               self.INFO.power = 'on';
               self.INFO.color = kelvin + "K";
               self.checkVariables();

@@ -38,6 +38,9 @@ class goveeInstance extends InstanceBase {
 			power: 'off',
 			brightness: '',
 			color: '',
+      minkelvin: '',
+      maxkelvin: '',
+      maxsegments: '',
 			api_calls_remaining: 10
 		};
 

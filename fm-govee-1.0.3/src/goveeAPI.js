@@ -75,10 +75,10 @@ class GoveeLED {
     return this.request(endpoint, reqData, "post");
   }
 
-  setColorTemperature(temperatureLevel) {
+  setColorTemperature(temperatureLevel, info) {
     if (!Number.isInteger(temperatureLevel)) throw new Error("Temperature Level Provided is Not A Number");
-    if (temperatureLevel > 6500) throw new Error("Temperature Level Provided is Not From 2200-6500");
-    if (temperatureLevel < 2200) throw new Error("Temperature Level Provided is Not From 2200-6500");
+    if (temperatureLevel > info.maxkelvin) throw new Error("Temperature Level Provided is Not From " + info.minkelvin + "-" + info.maxkelvin);
+    if (temperatureLevel < info.minkelvin) throw new Error("Temperature Level Provided is Not From " + info.minkelvin + "-" + info.maxkelvin);
     var reqData = {
       "requestId": "uuid",
       "payload": {
