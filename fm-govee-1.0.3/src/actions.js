@@ -111,82 +111,184 @@ module.exports = {
 			}
 		}
 		
-		actions.changeColorRGB = {
-			name: 'Change Color RGB',
-			options: [
-				{
-					type: 'colorpicker',
-					label: 'Color',
-					id: 'colorrgb',
-					default: combineRgb(255, 255, 255),
-					required: true,
-				}
-			],
-			callback: async function (action) {
-				let color = splitRgb(action.options.colorrgb);
-				try {
-					let hex = colorsys.rgbToHex(color.r, color.g, color.b);
-					self.GOVEE.setColor(hex).then((data) => {
-						self.INFO.power = 'on';
-						self.INFO.color = '(' + color.r + ', ' + color.g + ', ' + color.b + ')';
-						self.checkVariables();
-						self.checkFeedbacks();
-					}).catch((error) => {
-						self.processError(error);
-					});
-				}
-				catch(error) {
-					//probably error converting to hex
-					self.log('error', 'Error changing color: ' + error.toString());
-				}
-				if (self.config.verbose) {
-					self.log('info', 'Setting color to (' + color.r + ', ' + color.g + ', ' + color.b + ')');
-				}
-			}
-		}
-
-		actions.changeColorKelvin = {
-			name: 'Change Color Kelvin',
-			options: [
-				{
+    actions.changeColor = {
+      name: 'Change Color',
+      options: [
+        {
+          type: 'dropdown',
+          label: 'Select Color Mode',
+          id: 'colortype',
+          default: 'rgb',
+          choices: [
+              { id: 'rgb', label: 'RGB Color' },
+              { id: 'kelvin', label: 'Kelvin Temperature' }
+          ]
+        },
+        {
+          type: 'colorpicker',
+          id: 'colorrgb',
+          label: 'Pick a Color',
+          default: combineRgb(255, 255, 255),
+          required: true,
+          isVisible: (options) => options.colortype === 'rgb' // Only show if RGB is selected
+        },
+        {
+          type: 'number',
+          id: 'colorkelvin',
+          label: 'Kelvin Temperature (2200-6500)',
+          default: 4000,
+          min: 2200,
+          max: 6500,
+          required: true,
+          isVisible: (options) => options.colortype === 'kelvin' // Only show if Kelvin is selected
+        }
+      ],
+      callback: async function (action) {
+        let option = action.options;
+        if (option.colortype === 'rgb') {
+          let color = splitRgb(action.options.colorrgb);
+          try {
+            let hex = colorsys.rgbToHex(color.r, color.g, color.b);
+            self.GOVEE.setColor(hex).then((data) => {
+              self.INFO.power = 'on';
+              self.INFO.color = '(' + color.r + ', ' + color.g + ', ' + color.b + ')';
+              self.checkVariables();
+              self.checkFeedbacks();
+            }).catch((error) => {
+              self.processError(error);
+            });
+          }
+          catch(error) {
+            //probably error converting to hex
+            self.log('error', 'Error changing color: ' + error.toString());
+          }
+          if (self.config.verbose) {
+            self.log('info', 'Setting color to (' + color.r + ', ' + color.g + ', ' + color.b + ')');
+          }
+        } 
+        else if (option.colortype === 'kelvin') {
+          let kelvin = action.options.colorkelvin;
+          try {
+            self.GOVEE.setColorTemperature(kelvin).then((data) => {
+              self.INFO.power = 'on';
+              self.INFO.color = kelvin + "K";
+              self.checkVariables();
+              self.checkFeedbacks();
+            }).catch((error) => {
+              self.processError(error);
+            });
+          }
+          catch(error) {
+            //probably something
+            self.log('error', 'Error changing color: ' + error.toString());
+          }
+          if (self.config.verbose) {
+            self.log('info', 'Setting color temp to ' + kelvin + 'K');
+          }
+        }
+      }
+    }
+/*
+    actions.segments = {
+      name: 'Change Segment',
+      options: [
+        {
 					type: 'number',
-					label: 'TempKelvin',
-					id: 'colorkelvin',
-					default: 4000,
-					min: 2200,
-					max: 6500,
+					label: 'Number of segments',
+					id: 'numofseg',
+					default: 0,
+          min: 0,
 					required: true,
-					range: false
-				}
-			],
-			callback: async function (action) {
-				let kelvin = action.options.colorkelvin;
-				try {
-					self.GOVEE.setColorTemperature(kelvin).then((data) => {
-						self.INFO.power = 'on';
-						self.INFO.color = kelvin + "K";
-						self.checkVariables();
-						self.checkFeedbacks();
-					}).catch((error) => {
-						self.processError(error);
-					});
-				}
-				catch(error) {
-					//probably something
-					self.log('error', 'Error changing color: ' + error.toString());
-				}
-				if (self.config.verbose) {
-					self.log('info', 'Setting color temp to ' + kelvin + 'K');
-				}
-			}
-		}
+				},
+        {
+					type: 'number',
+					label: 'Brightness(empty->don\'t change)',
+					id: 'segbrightness',
+					default: '',
+          min: 0,
+          max: 100,
+					required: false,
+				},
+        {
+          type: 'dropdown',
+          label: 'Select Color Mode',
+          id: 'colortype',
+          default: 'rgb',
+          choices: [
+            { id: 'rgb', label: 'RGB Color' },
+            { id: 'kelvin', label: 'Kelvin Temperature' }
+          ]
+        },
+        {
+          type: 'colorpicker',
+          id: 'colorrgb',
+          label: 'Pick a Color',
+          default: combineRgb(255, 255, 255),
+          required: true,
+          isVisible: (options) => options.colortype === 'rgb' // Only show if RGB is selected
+        },
+        {
+          type: 'number',
+          id: 'colorkelvin',
+          label: 'Kelvin Temperature\n(2200-6500)',
+          default: 4000,
+          min: 2200,
+          max: 6500,
+          step: 100,
+          required: true,
+          isVisible: (options) => options.colortype === 'kelvin' // Only show if Kelvin is selected
+        }
+      ],
+      callback: async function (action) {
+        let option = action.options;
+        if (option.colortype === 'rgb') {
+          let color = splitRgb(action.options.colorrgb);
+          try {
+            let hex = colorsys.rgbToHex(color.r, color.g, color.b);
+            self.GOVEE.setColor(hex).then((data) => {
+              self.INFO.power = 'on';
+              self.INFO.color = '(' + color.r + ', ' + color.g + ', ' + color.b + ')';
+              self.checkVariables();
+              self.checkFeedbacks();
+            }).catch((error) => {
+              self.processError(error);
+            });
+          }
+          catch(error) {
+            //probably error converting to hex
+            self.log('error', 'Error changing color: ' + error.toString());
+          }
+          if (self.config.verbose) {
+            self.log('info', 'Setting color to (' + color.r + ', ' + color.g + ', ' + color.b + ')');
+          }
+        } 
+        else if (option.colortype === 'kelvin') {
+          let kelvin = action.options.colorkelvin;
+          try {
+            self.GOVEE.setColorTemperature(kelvin).then((data) => {
+              self.INFO.power = 'on';
+              self.INFO.color = kelvin + "K";
+              self.checkVariables();
+              self.checkFeedbacks();
+            }).catch((error) => {
+              self.processError(error);
+            });
+          }
+          catch(error) {
+            //probably something
+            self.log('error', 'Error changing color: ' + error.toString());
+          }
+          if (self.config.verbose) {
+            self.log('info', 'Setting color temp to ' + kelvin + 'K');
+          }
+        }
+      }
+    }
+*/
 
-    /* segment stuff here
-    // [ light segments ]
-    // [ select segment (number of segments '0-15') (number with range )]
-    // one option for segment 
 
-    */
+
+    
 
 
 
