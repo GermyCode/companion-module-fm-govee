@@ -3,7 +3,7 @@
 	"name": "fm-govee",
 	"shortname": "FM-Govee",
 	"description": "Companion module for controlling Govee lights at FM",
-	"version": "1.0.3",
+	"version": "1.0.5",
 	"license": "MIT",
 	"repository": "git+https://github.com/GermyCode/companion-module-fm-govee.git",
 	"bugs": "",
