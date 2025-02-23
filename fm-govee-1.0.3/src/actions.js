@@ -190,69 +190,100 @@ module.exports = {
         }
       }
     }
-    /*
-    actions.segments = {
-      name: 'Change Segment',
+
+    actions.segmentBrightness = {
+      name: 'Change Segment Brightness',
       options: [
         {
-					type: 'number',
-					label: 'Number of segments: max ' + self.INFO.maxsegments,
+					type: 'textinput',
+					label: `Segment: max 1,2,..,${self.getVariableValue('maxsegments')}`,
 					id: 'numofseg',
-					default: 0,
-          min: 0,
-          max: self.INFO.maxsegments
+					default: '1',
 					required: true,
 				},
         {
 					type: 'number',
-					label: 'Brightness(empty->don\'t change)',
+					label: 'Brightness',
 					id: 'segbrightness',
 					default: '',
           min: 0,
           max: 100,
-					required: false,
+					required: true,
+				},
+      ],
+      callback: async function (action) {
+        try {
+          let segArray = action.options.numofseg.split(',').map(Number);
+          // Ensure self.INFO.segments exists
+          if (!self.INFO.segments) {
+            self.log('error', 'self.INFO.segments is undefined!');
+            return;
+          }
+          // Convert segment keys to match input format (e.g., "segment 1" -> 1)
+          let segmentKeys = Object.keys(self.INFO.segments).map(key => parseInt(key.replace('segment ', '')));
+          self.GOVEE.setSegmentBrightness(action.options.segbrightness, segArray).then((data) => {
+            // self.INFO.power = 'on';
+            // self.checkVariables();
+            // self.checkFeedbacks();
+            for (let segId of segArray) {
+              if (segmentKeys.includes(segId)) {
+                self.INFO.segments[`segment ${segId}`].brightness = action.options.segbrightness;
+              } else {
+                self.log('warn', `Segment ${segId} not found in self.INFO.segments`);
+              }
+            }
+          }).catch((error) => {
+            self.processError(error);
+          });
+          if (self.config.verbose) {
+            self.log('info', `Setting brightness of segments ${JSON.stringify(segArray)} to ${action.options.segbrightness}%`);
+          }
+        } catch (error) {self.log('error', `Failed to update segments: ${error.message}`);}
+      }
+    }
+
+    actions.segmentColor = {
+      name: 'Change Segment Color',
+      options: [
+        {
+					type: 'textinput',
+					label: `Segment: max 1,2,..,${self.getVariableValue('maxsegments')}`,
+					id: 'numofseg',
+					default: '1,2,3',
+					required: true,
 				},
         {
-          type: 'dropdown',
-          label: 'Select Color Mode',
-          id: 'colortype',
-          default: 'rgb',
-          choices: [
-            { id: 'rgb', label: 'RGB Color' },
-            { id: 'kelvin', label: 'Kelvin Temperature' }
-          ]
-        },
-        {
           type: 'colorpicker',
-          id: 'colorrgb',
+          id: 'segcolorrgb',
           label: 'Pick a Color',
           default: combineRgb(255, 255, 255),
           required: true,
-          isVisible: (options) => options.colortype === 'rgb' // Only show if RGB is selected
         },
-        {
-          type: 'number',
-          id: 'colorkelvin',
-          label: 'Kelvin Temperature\n(2200-6500)',
-          default: 4000,
-          min: 2200,
-          max: 6500,
-          step: 100,
-          required: true,
-          isVisible: (options) => options.colortype === 'kelvin' // Only show if Kelvin is selected
-        }
       ],
       callback: async function (action) {
-        let option = action.options;
-        if (option.colortype === 'rgb') {
-          let color = splitRgb(action.options.colorrgb);
+        try {
+          let segArray = action.options.numofseg.split(',').map(Number);
+          // Ensure self.INFO.segments exists and is an object
+          if (!self.INFO.segments) {
+            self.log('error', 'self.INFO.segments is undefined!');
+            return;
+          }
+          // Convert segment keys to match input format (e.g., "segment 1" -> 1)
+          let segmentKeys = Object.keys(self.INFO.segments).map(key => parseInt(key.replace('segment ', '')));
+          let color = splitRgb(action.options.segcolorrgb);
           try {
             let hex = colorsys.rgbToHex(color.r, color.g, color.b);
-            self.GOVEE.setColor(hex).then((data) => {
-              self.INFO.power = 'on';
-              self.INFO.color = '(R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')';
-              self.checkVariables();
-              self.checkFeedbacks();
+            self.GOVEE.setSegmentColor(hex, segArray).then((data) => {
+              for (let segId of segArray) {
+                if (segmentKeys.includes(segId)) {
+                  self.INFO.segments[`segment ${segId}`].color = '(R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')';
+                } else {
+                  self.log('warn', `Segment ${segId} not found in self.INFO.segments`);
+                }
+              }
+              // self.INFO.power = 'on';
+              // self.checkVariables();
+              // self.checkFeedbacks();
             }).catch((error) => {
               self.processError(error);
             });
@@ -262,104 +293,42 @@ module.exports = {
             self.log('error', 'Error changing color: ' + error.toString());
           }
           if (self.config.verbose) {
-            self.log('info', 'Setting color to (R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')');
+            self.log('info', `Setting color of segments ${JSON.stringify(segArray)} to (R:` + color.r + ', G:' + color.g + ', B:' + color.b + ')');
           }
-        } 
-        else if (option.colortype === 'kelvin') {
-          let kelvin = action.options.colorkelvin;
-          try {
-            self.GOVEE.setColorTemperature(kelvin, self.INFO).then((data) => {
-              self.INFO.power = 'on';
-              self.INFO.color = kelvin + "K";
-              self.checkVariables();
-              self.checkFeedbacks();
-            }).catch((error) => {
-              self.processError(error);
-            });
-          }
-          catch(error) {
-            //probably something
-            self.log('error', 'Error changing color: ' + error.toString());
-          }
-          if (self.config.verbose) {
-            self.log('info', 'Setting color temp to ' + kelvin + 'K');
-          }
-        }
+        } catch (error) {self.log('error', `Failed to update segments: ${error.message}`);}
       }
     }
-*/
 
-
-
-    
-
-
-
-
-		/*actions.changeBrightnessAndColor = {
-			name: 'Change Brightness and Color',
-			options: [
-				{
-					type: 'number',
-					label: 'Brightness',
-					description: 'Enter a value between 1 - 100',
-					id: 'brightness',
-					default: 100,
-					min: 1,
-					max: 100,
-					required: true,
-					range: false,
-				},
-				{
-					type: 'colorpicker',
-					label: 'Color',
-					id: 'color',
-					default: combineRgb(255, 255, 255),
-					required: true,
-				}
-			],
-			callback: async function (action) {
-				let brightness = action.options.brightness;
-				if (self.INFO.brightness !== brightness) {
-					if (self.config.verbose) {
-						self.log('info', 'Setting brightness to ' + brightness);
-					}
-					self.GOVEE.setBrightness(action.options.brightness).then((data) => {
-						self.updateApiCalls('brightness');
-						self.INFO.power = 'on';
-						self.INFO.brightness = action.options.brightness;
-						self.checkVariables();
-						self.checkFeedbacks();
-					}).catch((error) => {
-						self.processError(error);
-					});
-				}
-
-				let color = splitRgb(action.options.color);
-				try {
-					let hex = colorsys.rgbToHex(color.r, color.g, color.b);
-					if (self.INFO.color !== hex) {
-						if (self.config.verbose) {
-							self.log('info', 'Setting color to ' + hex);
-						}
-						self.GOVEE.setColor(hex).then((data) => {
-							self.updateApiCalls('color');
-							self.INFO.power = 'on';
-							self.INFO.color = hex;
-							self.checkVariables();
-							self.checkFeedbacks();
-						}).catch((error) => {
-							self.processError(error);
-						});
-					}
-				}
-				catch(error) {
-					//probably error converting to hex
-					self.log('error', 'Error changing color: ' + error.toString());
-				}
-			}
-		}*/
-
+    actions.getINFO = {
+      name: 'Get INFO',
+      options: [
+        {
+          type: 'textinput',
+          label: 'Debug Key',
+          id: 'debugINFO',
+          default: '',
+          required: false
+        }
+      ],
+      callback: async function (action) {
+        // Ensure self.INFO is initialized
+        if (!self.INFO) {
+          self.log('error', 'self.INFO is not initialized yet!');
+          return;
+        }
+        if (action.options.debugINFO !== '') {
+          // Check if the key exists in self.INFO
+          if (self.INFO.hasOwnProperty(action.options.debugINFO)) {
+            self.log('info', `INFO (${action.options.debugINFO}): ` + JSON.stringify(self.INFO[action.options.debugINFO], null, 2));
+          } else {
+            self.log('warn', `INFO: Key '${action.options.debugINFO}' not found in self.INFO`);
+          }
+        } else {
+          // Log the entire self.INFO object
+          self.log('info', 'INFO: ' + JSON.stringify(self.INFO, null, 2));
+        }
+      }
+    };
 		self.setActionDefinitions(actions);
 	}
 }

@@ -1,4 +1,5 @@
 // this is more up-to-date than 'node-govee-led'
+// put here because of management purposes
 const axios = require('axios');
 
 class GoveeLED {
@@ -94,6 +95,45 @@ class GoveeLED {
     var endpoint = '/device/control';
     return this.request(endpoint, reqData, "post");
   }
+  
+  setSegmentColor(hexCode, segment) {
+    var regex = /^#([0-9A-F]{3}){1,2}$/i;
+    if (!regex.test(hexCode)) throw new Error("Invalid Hex Color Code");
+    
+    function hex2rgb(hex) {
+      var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+      hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+      });
+
+      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    }
+
+    var RGBconv = hex2rgb(hexCode);
+    var APIconv = ((RGBconv.r & 0xFF) << 16) | ((RGBconv.g & 0xFF) << 8) | ((RGBconv.b & 0xFF) << 0);
+    var reqData = {
+      "requestId": "1",
+      "payload": {
+        "sku": this.sku,
+        "device": this.mac,
+          "capability": {
+          "type": "devices.capabilities.segment_color_setting",
+          "instance": "segmentedColorRgb",
+          "value": {
+            "segment": segment,
+            "rgb": APIconv
+          }
+        }
+      }
+    };
+    var endpoint = '/device/control';
+    return this.request(endpoint, reqData, "post");
+  }
 
   setBrightness(brightnessLevel) {
     if (!Number.isInteger(brightnessLevel)) throw new Error("Brightness Level Provided is Not A Number");
@@ -108,6 +148,29 @@ class GoveeLED {
           "type": "devices.capabilities.range",
           "instance": "brightness",
           "value": brightnessLevel
+        }
+      }
+    };
+    var endpoint = '/device/control';
+    return this.request(endpoint, reqData, "post");
+  }
+
+  setSegmentBrightness(brightnessLevel, segment) {
+    if (!Number.isInteger(brightnessLevel)) throw new Error("Brightness Level Provided is Not A Number");
+    if (brightnessLevel > 100) throw new Error("Brightness Level Provided is Not From 1-100");
+    if (brightnessLevel < 1) throw new Error("Brightness Level Provided is Not From 1-100");
+    var reqData = {
+      "requestId": "1",
+      "payload": {
+        "sku": this.sku,
+        "device": this.mac,
+          "capability": {
+          "type": "devices.capabilities.segment_color_setting",
+          "instance": "segmentedBrightness",
+          "value": {
+            "segment": segment,
+            "brightness": brightnessLevel
+          }
         }
       }
     };

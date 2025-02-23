@@ -14,20 +14,27 @@ If your device is not found, you can manually enter its MAC address and Model nu
 
 ### Actions
 
-* Turn On
-* Turn Off
-* Change Brightness
-* Change Color
+* Turn device On
+* Turn device Off
+* Change device brightness
+* Change device color, RGB and kelvin temperature
+* Change segment brightness
+* Change segment color, RGB (kelvin is not supproted by segments)
+
+### Segment Control
+* To specify what segments you want to change, use this formatting: '1,2,3,..'. They dont need to be consecutive. To change specific segments '1,3,6,10,..' or just '3' to change one segment
 
 ### Variables
 
-* Last Set Power State
-* Last Set Brightness Level
-* Last Set Color
+* Last set power state
+* Last set brightness level
+* Last set color
+* Min and max color temperatures
+* Max segments
 
 ### Feedbacks
 
-* Last Set Power State
+* Last set power state
 
 ### Presets
 

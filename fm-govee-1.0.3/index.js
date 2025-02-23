@@ -41,6 +41,7 @@ class goveeInstance extends InstanceBase {
       minkelvin: '',
       maxkelvin: '',
       maxsegments: '',
+      segments: {},
 			api_calls_remaining: 10
 		};
 

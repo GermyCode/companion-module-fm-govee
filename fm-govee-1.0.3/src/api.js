@@ -162,6 +162,12 @@ module.exports = {
         self.INFO.minkelvin = goveeDevice.minkelvin;
         self.INFO.maxkelvin = goveeDevice.maxkelvin;
         self.INFO.maxsegments = goveeDevice.maxsegments;
+        for (let i = 1; i < self.INFO.maxsegments + 1; i++) {
+          self.INFO.segments['segment ' + i] = {
+            brightness: '',
+            color: ''
+          };
+        }
       }
 			else {
 				self.log('error', `Invalid Govee Device Selected: ${mac}`);
