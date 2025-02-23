@@ -200,6 +200,7 @@ module.exports = {
 					id: 'numofseg',
 					default: '1',
 					required: true,
+          isVisible: () => self.INFO.segments && Object.keys(self.INFO.segments).length > 0
 				},
         {
 					type: 'number',
@@ -209,9 +210,14 @@ module.exports = {
           min: 0,
           max: 100,
 					required: true,
+          isVisible: () => self.INFO.segments && Object.keys(self.INFO.segments).length > 0
 				},
       ],
       callback: async function (action) {
+        if (!self.INFO.segments || Object.keys(self.INFO.segments).length < 1) {
+          self.log('error', 'This device does not support segments.');
+          return;
+        }
         try {
           let segArray = action.options.numofseg.split(',').map(Number);
           // Ensure self.INFO.segments exists
@@ -251,6 +257,7 @@ module.exports = {
 					id: 'numofseg',
 					default: '1,2,3',
 					required: true,
+          isVisible: () => !!self.INFO.segments && Object.keys(self.INFO.segments).length > 0
 				},
         {
           type: 'colorpicker',
@@ -258,9 +265,14 @@ module.exports = {
           label: 'Pick a Color',
           default: combineRgb(255, 255, 255),
           required: true,
+          isVisible: () => !!self.INFO.segments && Object.keys(self.INFO.segments).length > 0
         },
       ],
       callback: async function (action) {
+        if (!self.INFO.segments || Object.keys(self.INFO.segments).length < 1) {
+          self.log('error', 'This device does not support segments.');
+          return;
+        }
         try {
           let segArray = action.options.numofseg.split(',').map(Number);
           // Ensure self.INFO.segments exists and is an object
