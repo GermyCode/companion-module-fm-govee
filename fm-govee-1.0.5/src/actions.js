@@ -1,6 +1,7 @@
 const { combineRgb, splitRgb } = require('@companion-module/base');
 
 const colorsys = require('colorsys');
+const GoveeLED = require('./goveeAPI');
 
 module.exports = {
 	initActions: function () {
@@ -196,7 +197,7 @@ module.exports = {
       options: [
         {
 					type: 'textinput',
-					label: `Segment: max 1,2,..,${self.getVariableValue('maxsegments')}`,
+					label: `Segment: max 0,1,..,${self.getVariableValue('maxsegments')}`,
 					id: 'numofseg',
 					default: '1',
 					required: true,
@@ -235,7 +236,7 @@ module.exports = {
               if (segmentKeys.includes(segId)) {
                 self.INFO.segments[`segment ${segId}`].brightness = action.options.segbrightness;
               } else {
-                self.log('warn', `Segment ${segId} not found in self.INFO.segments`);
+                self.log('warn', `Segment ${segId+1} not found in self.INFO.segments`);
               }
             }
           }).catch((error) => {
@@ -253,7 +254,7 @@ module.exports = {
       options: [
         {
 					type: 'textinput',
-					label: `Segment: max 1,2,..,${self.getVariableValue('maxsegments')}`,
+					label: `Segment: max 0,1,..,${self.getVariableValue('maxsegments')}`,
 					id: 'numofseg',
 					default: '1,2,3',
 					required: true,
@@ -274,16 +275,17 @@ module.exports = {
           return;
         }
         try {
-          let segArray = action.options.numofseg.split(',').map(Number);
           // Ensure self.INFO.segments exists and is an object
           if (!self.INFO.segments) {
             self.log('error', 'self.INFO.segments is undefined!');
             return;
           }
+          let segArray = action.options.numofseg.split(',').map(Number);
           // Convert segment keys to match input format (e.g., "segment 1" -> 1)
           let segmentKeys = Object.keys(self.INFO.segments).map(key => parseInt(key.replace('segment ', '')));
           let color = splitRgb(action.options.segcolorrgb);
           try {
+            self.log('info', segArray);
             let hex = colorsys.rgbToHex(color.r, color.g, color.b);
             self.GOVEE.setSegmentColor(hex, segArray).then((data) => {
               for (let segId of segArray) {

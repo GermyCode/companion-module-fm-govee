@@ -143,7 +143,7 @@ module.exports = {
           else if (capabilities.type === "devices.capabilities.segment_color_setting") {
             for (let field of capabilities.parameters.fields) {
               if (field.fieldName === "segment" && field.size) {
-                goveeDevice.maxsegments = field.size.max;
+                goveeDevice.maxsegments = field.size.max - 1;
               }
             }
           }
@@ -161,7 +161,7 @@ module.exports = {
         self.INFO.minkelvin = goveeDevice.minkelvin;
         self.INFO.maxkelvin = goveeDevice.maxkelvin;
         self.INFO.maxsegments = goveeDevice.maxsegments;
-        for (let i = 1; i < self.INFO.maxsegments + 1; i++) {
+        for (let i = 0; i < self.INFO.maxsegments + 1; i++) {
           self.INFO.segments['segment ' + i] = {
             brightness: '',
             color: ''

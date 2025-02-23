@@ -11,7 +11,6 @@ class GoveeLED {
   }
 
   request(endpoint, reqData, method) {
-
     return new Promise( ( resolve, reject ) => {
 
       if (this.mac === "") return reject(new Error("No MAC Address provided."));
@@ -29,7 +28,6 @@ class GoveeLED {
         },
         data: data
       };
-
       axios(config)
       .then(function (response) {
         resolve(response.data);
@@ -73,7 +71,7 @@ class GoveeLED {
       }
     };
     var endpoint = '/device/control';
-    return this.request(endpoint, reqData, "post");
+    return (this.request(endpoint, reqData, "post"));
   }
 
   setColorTemperature(temperatureLevel, info) {
@@ -137,8 +135,8 @@ class GoveeLED {
 
   setBrightness(brightnessLevel) {
     if (!Number.isInteger(brightnessLevel)) throw new Error("Brightness Level Provided is Not A Number");
-    if (brightnessLevel > 100) throw new Error("Brightness Level Provided is Not From 1-100");
-    if (brightnessLevel < 1) throw new Error("Brightness Level Provided is Not From 1-100");
+    if (brightnessLevel > 100) throw new Error("Brightness Level Provided is Not From 0-100");
+    if (brightnessLevel < 0) throw new Error("Brightness Level Provided is Not From 0-100");
     var reqData = {
       "requestId": "1",
       "payload": {
@@ -157,8 +155,8 @@ class GoveeLED {
 
   setSegmentBrightness(brightnessLevel, segment) {
     if (!Number.isInteger(brightnessLevel)) throw new Error("Brightness Level Provided is Not A Number");
-    if (brightnessLevel > 100) throw new Error("Brightness Level Provided is Not From 1-100");
-    if (brightnessLevel < 1) throw new Error("Brightness Level Provided is Not From 1-100");
+    if (brightnessLevel > 100) throw new Error("Brightness Level Provided is Not From 0-100");
+    if (brightnessLevel < 0) throw new Error("Brightness Level Provided is Not From 0-100");
     var reqData = {
       "requestId": "1",
       "payload": {

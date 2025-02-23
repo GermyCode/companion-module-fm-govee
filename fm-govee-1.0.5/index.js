@@ -38,10 +38,10 @@ class goveeInstance extends InstanceBase {
 			power: 'off',
 			brightness: '',
 			color: '',
-      minkelvin: '',
-      maxkelvin: '',
-      maxsegments: '',
-      segments: {},
+			minkelvin: '',
+			maxkelvin: '',
+			maxsegments: '',
+			segments: {},
 			api_calls_remaining: 10
 		};
 
@@ -72,7 +72,7 @@ class goveeInstance extends InstanceBase {
 		if (this.config.verbose) {
 			this.log('info', 'Verbose mode enabled. Log entries will contain detailed information.');
 		}
-	
+
 		this.updateStatus(InstanceStatus.Connecting);
 
 		if (this.config.api_key !== undefined && this.config.api_key !== '') {
