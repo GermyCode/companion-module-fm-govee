@@ -112,6 +112,129 @@ module.exports = {
 				}
 			}
 		}
+
+    actions.segmentBrightness = {
+      name: 'Change Segment Brightness',
+      options: [
+        {
+					type: 'textinput',
+					label: `Segment: 0,1,..,${self.getVariableValue('maxsegments')}`,
+					id: 'numofseg',
+					default: '0,1,2',
+					required: true,
+				},
+        {
+					type: 'number',
+					label: 'Brightness',
+					id: 'segbrightness',
+					default: '',
+          min: 0,
+          max: 100,
+					required: true,
+				},
+      ],
+      callback: async function (action) {
+        let segArray = action.options.numofseg.split(',').map(Number);
+        if (!self.INFO.segments || Object.keys(self.INFO.segments).length < 1) {
+          self.log('error', 'This device does not support segments.');
+          return;
+        }
+        if (segArray.length > Object.keys(self.INFO.segments).length) {
+          self.log('error', 'This device does not support that many segments.');
+          return;
+        }
+        try {
+          // Ensure self.INFO.segments exists
+          if (!self.INFO.segments) {
+            self.log('error', 'self.INFO.segments is undefined!');
+            return;
+          }
+          // Convert segment keys to match input format (e.g., "segment 1" -> 1)
+          let segmentKeys = Object.keys(self.INFO.segments).map(key => parseInt(key.replace('segment ', '')));
+          self.GOVEE.setSegmentBrightness(action.options.segbrightness, segArray).then((data) => {
+            if (self.GOVEE.sku === 'H60A1' && segArray.length > 13) {
+              self.updateApiCalls('segmentbrightnessh60a1main');
+              self.updateApiCalls('segmentbrightnessh60a1ring');
+            } else {
+              self.updateApiCalls('segmentbrightness');
+            }
+            // self.INFO.power = 'on';
+            // self.checkVariables();
+            // self.checkFeedbacks();
+            for (let segId of segArray) {
+              if (segmentKeys.includes(segId)) {
+                self.INFO.segments[`segment ${segId}`].brightness = action.options.segbrightness;
+              } else {
+                self.log('warn', `Segment ${segId} not found in self.INFO.segments`);
+              }
+            }
+          }).catch((error) => {
+            self.processError(error);
+          });
+          if (self.config.verbose) {
+            self.log('info', `Setting brightness of segments ${JSON.stringify(segArray)} to ${action.options.segbrightness}%`);
+          }
+        } catch (error) {self.log('error', `Failed to update segments: ${error.message}`);}
+      }
+    }
+
+    actions.gradientToggle = {
+      name: 'Segment Gradient',
+      options: [{
+        type: 'dropdown',
+        label: 'Gradient',
+        id: 'gradienttoggle',
+        default: 'off',
+        choices: [
+          { id: 'on', label: 'On' },
+          { id: 'off', label: 'Off' },
+          { id: 'toggle', label: 'Toggle' },
+        ]
+      }],
+      callback: async function (action) {
+        if (!self.INFO.segments || Object.keys(self.INFO.segments).length < 1) {
+          self.log('error', 'This device does not support segments.');
+          return;
+        }
+        try {
+          if (action.options.gradienttoggle === 'on') {
+            self.GOVEE.setGradientToggle(true).then((data) => {
+              self.updateApiCalls('gradienttoggle');
+              self.INFO.gradienttoggle = true;
+            }).catch((error) => {
+              self.processError(error);
+            });
+            if (self.config.verbose) {
+              self.log('info', 'Setting gradient toggle to true');
+            }
+          }
+          else if (action.options.gradienttoggle === 'off') {
+            self.GOVEE.setGradientToggle(false).then((data) => {
+              self.updateApiCalls('gradienttoggle');
+              self.INFO.gradienttoggle = false;
+            }).catch((error) => {
+              self.processError(error);
+            });
+            if (self.config.verbose) {
+              self.log('info', 'Setting gradient toggle to false');
+            }
+          }
+          else if (action.options.gradienttoggle === 'toggle') {
+            let gradval = self.INFO.gradienttoggle;
+            self.GOVEE.setGradientToggle(!gradval).then((data) => {
+              self.updateApiCalls('gradienttoggle');
+              self.INFO.gradienttoggle = !gradval;
+            }).catch((error) => {
+              self.processError(error);
+            });
+            if (self.config.verbose) {
+              self.log('info', 'Setting gradient toggle to ' + !gradval);
+            }
+          }
+        } catch (error) {self.log('error', 'Failed to update set gradient toggle');}
+      }
+    }
+
     actions.changeColor = {
       name: 'Change Color',
       options: [
@@ -173,6 +296,8 @@ module.exports = {
         } 
         else if (option.colortype === 'kelvin') {
           let kelvin = action.options.colorkelvin;
+          if (!Number.isInteger(kelvin)) {self.log('error', 'Kelvin temperature not a number'); return;}
+          if (kelvin < self.INFO.minkelvin || kelvin > self.INFO.maxkelvin) {self.log('error', 'Kelvin temperature not between '+self.INFO.minkelvin+'-'+self.INFO.maxkelvin); return;}
           try {
             self.GOVEE.setColorTemperature(kelvin, self.INFO).then((data) => {
               self.updateApiCalls('colortemperature');
@@ -195,68 +320,12 @@ module.exports = {
       }
     }
 
-    actions.segmentBrightness = {
-      name: 'Change Segment Brightness',
-      options: [
-        {
-					type: 'textinput',
-					label: `Segment: max 0,1,..,${self.getVariableValue('maxsegments')}`,
-					id: 'numofseg',
-					default: '1',
-					required: true,
-				},
-        {
-					type: 'number',
-					label: 'Brightness',
-					id: 'segbrightness',
-					default: '',
-          min: 0,
-          max: 100,
-					required: true,
-				},
-      ],
-      callback: async function (action) {
-        if (!self.INFO.segments || Object.keys(self.INFO.segments).length < 1) {
-          self.log('error', 'This device does not support segments.');
-          return;
-        }
-        try {
-          let segArray = action.options.numofseg.split(',').map(Number);
-          // Ensure self.INFO.segments exists
-          if (!self.INFO.segments) {
-            self.log('error', 'self.INFO.segments is undefined!');
-            return;
-          }
-          // Convert segment keys to match input format (e.g., "segment 1" -> 1)
-          let segmentKeys = Object.keys(self.INFO.segments).map(key => parseInt(key.replace('segment ', '')));
-          self.GOVEE.setSegmentBrightness(action.options.segbrightness, segArray).then((data) => {
-            self.updateApiCalls('segmentbrightness');
-            // self.INFO.power = 'on';
-            // self.checkVariables();
-            // self.checkFeedbacks();
-            for (let segId of segArray) {
-              if (segmentKeys.includes(segId)) {
-                self.INFO.segments[`segment ${segId}`].brightness = action.options.segbrightness;
-              } else {
-                self.log('warn', `Segment ${segId+1} not found in self.INFO.segments`);
-              }
-            }
-          }).catch((error) => {
-            self.processError(error);
-          });
-          if (self.config.verbose) {
-            self.log('info', `Setting brightness of segments ${JSON.stringify(segArray)} to ${action.options.segbrightness}%`);
-          }
-        } catch (error) {self.log('error', `Failed to update segments: ${error.message}`);}
-      }
-    }
-
     actions.segmentColor = {
       name: 'Change Segment Color',
       options: [
         {
 					type: 'textinput',
-					label: `Segment: max 0,1,..,${self.getVariableValue('maxsegments')}`,
+					label: 'Segment: 0,1,..,' + (`${self.getVariableValue('maxsegments')}`-1),
 					id: 'numofseg',
 					default: '1,2,3',
 					required: true,
@@ -270,9 +339,19 @@ module.exports = {
         },
       ],
       callback: async function (action) {
+        let segArray = action.options.numofseg.split(',').map(Number);
         if (!self.INFO.segments || Object.keys(self.INFO.segments).length < 1) {
           self.log('error', 'This device does not support segments.');
           return;
+        }
+        for (let segId of segArray) {
+          if (segId === 13) {
+            self.log('error', 'This device doesnt support changing the main light segment color. Try setting the device color then the other segments separately');
+            return;
+          } else if (segId > self.INFO.maxsegments){
+            self.log('error', 'This device doesnt support that many segments: ' + segId);
+            return;
+          }
         }
         try {
           // Ensure self.INFO.segments exists and is an object
@@ -280,12 +359,10 @@ module.exports = {
             self.log('error', 'self.INFO.segments is undefined!');
             return;
           }
-          let segArray = action.options.numofseg.split(',').map(Number);
           // Convert segment keys to match input format (e.g., "segment 1" -> 1)
           let segmentKeys = Object.keys(self.INFO.segments).map(key => parseInt(key.replace('segment ', '')));
           let color = splitRgb(action.options.segcolorrgb);
           try {
-            self.log('info', segArray);
             let hex = colorsys.rgbToHex(color.r, color.g, color.b);
             self.GOVEE.setSegmentColor(hex, segArray).then((data) => {
               self.updateApiCalls('segmentcolor');
@@ -311,63 +388,6 @@ module.exports = {
             self.log('info', `Setting color of segments ${JSON.stringify(segArray)} to (R:` + color.r + ', G:' + color.g + ', B:' + color.b + ')');
           }
         } catch (error) {self.log('error', `Failed to update segments: ${error.message}`);}
-      }
-    }
-
-    actions.gradientToggle = {
-      name: 'Segment Gradient',
-      options: [{
-        type: 'dropdown',
-        label: 'Gradient',
-        id: 'gradienttoggle',
-        default: 'off',
-        choices: [
-          { id: 'on', label: 'On' },
-          { id: 'off', label: 'Off' },
-          { id: 'toggle', label: 'Toggle' },
-        ]
-      }],
-      callback: async function (action) {
-        if (!self.INFO.segments || Object.keys(self.INFO.segments).length < 1) {
-          self.log('error', 'This device does not support segments.');
-          return;
-        }
-        try {
-          if (action.options.gradienttoggle === 'on') {
-            self.GOVEE.setGradientToggle(true).then((data) => {
-              self.updateApiCalls('gradienttoggle');
-              self.INFO.gradienttoggle = true;
-            }).catch((error) => {
-              self.processError(error);
-            });
-            if (self.config.verbose) {
-              self.log('info', 'Setting gradient toggle to true');
-            }
-          }
-          else if (action.options.gradienttoggle === 'off') {
-            self.GOVEE.setGradientToggle(false).then((data) => {
-              self.updateApiCalls('gradienttoggle');
-              self.INFO.gradienttoggle = false;
-            }).catch((error) => {
-              self.processError(error);
-            });
-            if (self.config.verbose) {
-              self.log('info', 'Setting gradient toggle to false');
-            }
-          }
-          else if (action.options.gradienttoggle === 'toggle') {
-            let gradval = self.INFO.gradienttoggle;
-            self.GOVEE.setGradientToggle(!gradval).then((data) => {
-              self.updateApiCalls('gradienttoggle');
-              self.INFO.gradienttoggle = !gradval;
-            }).catch((error) => {
-              self.processError(error);
-            });
-            if (self.config.verbose) {
-              self.log('info', 'Setting gradient toggle to ' + !gradval);
-            }
-          }
-        } catch (error) {self.log('error', 'Failed to update set gradient toggle');}
       }
     }
 

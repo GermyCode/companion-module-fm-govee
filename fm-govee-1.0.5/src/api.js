@@ -149,24 +149,32 @@ module.exports = {
           }
         }
 
-        let variableObj = {
-          'device': goveeDevice.device,
-          'sku': goveeDevice.sku,
-          'device_name': goveeDevice.deviceName,
-          'minkelvin': goveeDevice.minkelvin ?? 2000,
-          'maxkelvin': goveeDevice.maxkelvin ?? 6500,
-          'maxsegments': goveeDevice.maxsegments ?? 0
-        };
-        self.setVariableValues(variableObj);
-        self.INFO.minkelvin = goveeDevice.minkelvin;
-        self.INFO.maxkelvin = goveeDevice.maxkelvin;
-        self.INFO.maxsegments = goveeDevice.maxsegments;
-        for (let i = 0; i < self.INFO.maxsegments + 1; i++) {
-          self.INFO.segments['segment ' + i] = {
-            brightness: '',
-            color: ''
-          };
-        }
+				let segments = goveeDevice.maxsegments;
+				// thing with the H60A1 where it has more segments than the api allows
+				// also it shows 12 segments instead of 13, 13 being the main light
+				if (self.GOVEE.sku === "H60A1") {
+					segments += 1;
+				}
+
+				self.INFO.maxsegments = segments;
+				self.INFO.minkelvin = goveeDevice.minkelvin;
+				self.INFO.maxkelvin = goveeDevice.maxkelvin;
+
+				let variableObj = {
+					'device': goveeDevice.device,
+					'sku': goveeDevice.sku,
+					'device_name': goveeDevice.deviceName,
+					'minkelvin': goveeDevice.minkelvin ?? 2000,
+					'maxkelvin': goveeDevice.maxkelvin ?? 6500,
+					'maxsegments': segments ?? 0
+				};
+				self.setVariableValues(variableObj);
+				for (let i = 0; i < segments + 1; i++) {
+					self.INFO.segments['segment ' + i] = {
+						brightness: '',
+						color: ''
+					};
+				}
         self.initActions();
       }
 			else {
