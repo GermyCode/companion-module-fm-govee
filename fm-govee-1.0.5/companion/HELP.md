@@ -20,9 +20,10 @@ If your device is not found, you can manually enter its MAC address and Model nu
 * Change device color, RGB and kelvin temperature
 * Change segment brightness
 * Change segment color, RGB (kelvin is not supproted by segments)
+* Gradient toggle to make a gradient between segments
 
 ### Segment Control
-* To specify what segments you want to change, use this formatting: '1,2,3,..'. They dont need to be consecutive. To change specific segments '1,3,6,10,..' or just '3' to change one segment
+* To specify what segments you want to change, use this formatting: '0,1,2,..'. They dont need to be consecutive. To change specific segments '0,1,6,10,..' or just '3' to change one segment
 
 ### Variables
 

@@ -119,7 +119,7 @@ class GoveeLED {
       "payload": {
         "sku": this.sku,
         "device": this.mac,
-          "capability": {
+        "capability": {
           "type": "devices.capabilities.segment_color_setting",
           "instance": "segmentedColorRgb",
           "value": {
@@ -133,6 +133,28 @@ class GoveeLED {
     return this.request(endpoint, reqData, "post");
   }
 
+  setGradientToggle(toggle) {
+    if (toggle) {
+      toggle = 1;
+    } else {
+      toggle = 0
+    }
+    var reqData = {
+      "requestId": "uuid",
+      "payload": {
+        "sku": this.sku,
+        "device": this.mac,
+        "capability": {
+          "type": "devices.capabilities.toggle",
+          "instance": "gradientToggle",
+          "value": toggle
+        }
+      }
+    };
+    var endpoint = '/device/control';
+    return this.request(endpoint, reqData, "post");
+  }
+  
   setBrightness(brightnessLevel) {
     if (!Number.isInteger(brightnessLevel)) throw new Error("Brightness Level Provided is Not A Number");
     if (brightnessLevel > 100) throw new Error("Brightness Level Provided is Not From 0-100");
@@ -142,7 +164,7 @@ class GoveeLED {
       "payload": {
         "sku": this.sku,
         "device": this.mac,
-          "capability": {
+        "capability": {
           "type": "devices.capabilities.range",
           "instance": "brightness",
           "value": brightnessLevel
@@ -162,7 +184,7 @@ class GoveeLED {
       "payload": {
         "sku": this.sku,
         "device": this.mac,
-          "capability": {
+        "capability": {
           "type": "devices.capabilities.segment_color_setting",
           "instance": "segmentedBrightness",
           "value": {

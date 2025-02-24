@@ -99,6 +99,7 @@ module.exports = {
 			],
 			callback: async function (action) {
 				self.GOVEE.setBrightness(action.options.brightness).then((data) => {
+          self.updateApiCalls('brightness');
 					self.INFO.power = 'on';
 					self.INFO.brightness = action.options.brightness;
 					self.checkVariables();
@@ -153,6 +154,7 @@ module.exports = {
           try {
             let hex = colorsys.rgbToHex(color.r, color.g, color.b);
             self.GOVEE.setColor(hex).then((data) => {
+              self.updateApiCalls('setcolorrgb');
               self.INFO.power = 'on';
               self.INFO.color = '(R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')';
               self.checkVariables();
@@ -173,6 +175,7 @@ module.exports = {
           let kelvin = action.options.colorkelvin;
           try {
             self.GOVEE.setColorTemperature(kelvin, self.INFO).then((data) => {
+              self.updateApiCalls('colortemperature');
               self.INFO.power = 'on';
               self.INFO.color = kelvin + "K";
               self.checkVariables();
@@ -201,7 +204,6 @@ module.exports = {
 					id: 'numofseg',
 					default: '1',
 					required: true,
-          isVisible: () => self.INFO.segments && Object.keys(self.INFO.segments).length > 0
 				},
         {
 					type: 'number',
@@ -211,7 +213,6 @@ module.exports = {
           min: 0,
           max: 100,
 					required: true,
-          isVisible: () => self.INFO.segments && Object.keys(self.INFO.segments).length > 0
 				},
       ],
       callback: async function (action) {
@@ -229,6 +230,7 @@ module.exports = {
           // Convert segment keys to match input format (e.g., "segment 1" -> 1)
           let segmentKeys = Object.keys(self.INFO.segments).map(key => parseInt(key.replace('segment ', '')));
           self.GOVEE.setSegmentBrightness(action.options.segbrightness, segArray).then((data) => {
+            self.updateApiCalls('segmentbrightness');
             // self.INFO.power = 'on';
             // self.checkVariables();
             // self.checkFeedbacks();
@@ -258,7 +260,6 @@ module.exports = {
 					id: 'numofseg',
 					default: '1,2,3',
 					required: true,
-          isVisible: () => !!self.INFO.segments && Object.keys(self.INFO.segments).length > 0
 				},
         {
           type: 'colorpicker',
@@ -266,7 +267,6 @@ module.exports = {
           label: 'Pick a Color',
           default: combineRgb(255, 255, 255),
           required: true,
-          isVisible: () => !!self.INFO.segments && Object.keys(self.INFO.segments).length > 0
         },
       ],
       callback: async function (action) {
@@ -288,6 +288,7 @@ module.exports = {
             self.log('info', segArray);
             let hex = colorsys.rgbToHex(color.r, color.g, color.b);
             self.GOVEE.setSegmentColor(hex, segArray).then((data) => {
+              self.updateApiCalls('segmentcolor');
               for (let segId of segArray) {
                 if (segmentKeys.includes(segId)) {
                   self.INFO.segments[`segment ${segId}`].color = '(R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')';
@@ -310,6 +311,63 @@ module.exports = {
             self.log('info', `Setting color of segments ${JSON.stringify(segArray)} to (R:` + color.r + ', G:' + color.g + ', B:' + color.b + ')');
           }
         } catch (error) {self.log('error', `Failed to update segments: ${error.message}`);}
+      }
+    }
+
+    actions.gradientToggle = {
+      name: 'Segment Gradient',
+      options: [{
+        type: 'dropdown',
+        label: 'Gradient',
+        id: 'gradienttoggle',
+        default: 'off',
+        choices: [
+          { id: 'on', label: 'On' },
+          { id: 'off', label: 'Off' },
+          { id: 'toggle', label: 'Toggle' },
+        ]
+      }],
+      callback: async function (action) {
+        if (!self.INFO.segments || Object.keys(self.INFO.segments).length < 1) {
+          self.log('error', 'This device does not support segments.');
+          return;
+        }
+        try {
+          if (action.options.gradienttoggle === 'on') {
+            self.GOVEE.setGradientToggle(true).then((data) => {
+              self.updateApiCalls('gradienttoggle');
+              self.INFO.gradienttoggle = true;
+            }).catch((error) => {
+              self.processError(error);
+            });
+            if (self.config.verbose) {
+              self.log('info', 'Setting gradient toggle to true');
+            }
+          }
+          else if (action.options.gradienttoggle === 'off') {
+            self.GOVEE.setGradientToggle(false).then((data) => {
+              self.updateApiCalls('gradienttoggle');
+              self.INFO.gradienttoggle = false;
+            }).catch((error) => {
+              self.processError(error);
+            });
+            if (self.config.verbose) {
+              self.log('info', 'Setting gradient toggle to false');
+            }
+          }
+          else if (action.options.gradienttoggle === 'toggle') {
+            let gradval = self.INFO.gradienttoggle;
+            self.GOVEE.setGradientToggle(!gradval).then((data) => {
+              self.updateApiCalls('gradienttoggle');
+              self.INFO.gradienttoggle = !gradval;
+            }).catch((error) => {
+              self.processError(error);
+            });
+            if (self.config.verbose) {
+              self.log('info', 'Setting gradient toggle to ' + !gradval);
+            }
+          }
+        } catch (error) {self.log('error', 'Failed to update set gradient toggle');}
       }
     }
 
