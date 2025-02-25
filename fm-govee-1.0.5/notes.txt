@@ -1,7 +1,0 @@
-FOR BRIGHTNESS
-model H60A1 has in theory 0-13 segments, 1-12 being the ring and 13 being the center.
-BUT you cant put all 13 segments in one array, [0,1,2,3,4,5,6,7,8,9,10,11,12,13] because the api is expecting 1-13 or 0-12, essentially 13 indexes not 14.
-
-FOR RGB
-same as before but it says there are only 1-12 segments instead of 1-13 but the array is big enough to have 1-13
-this is an api issue and nothing i can do to get around it. so i need to set the whole light to the color of segment 13 then set the other
