@@ -268,15 +268,78 @@ class GoveeLED {
     return this.request(endpoint, reqData, "post");
   }
 
-  getState() {
+  setSnapshot(snapshot) {
+    var reqData = {
+      "requestId": "1",
+      "payload": {
+        "sku": this.sku,
+        "device": this.mac,
+        "capability": {
+          "type": "devices.capabilities.dynamic_scene",
+          "instance": "snapshot",
+          "value": snapshot
+        }
+      }
+    };
+    var endpoint = '/device/control';
+    return this.request(endpoint, reqData, "post");
+  }
+
+  getDynamicScenes() {
     var reqData = {
       "requestId": "uuid",
       "payload": {
         "sku": this.sku,
-        "device": this.mac
+        "device": this.mac,
       }
     };
-    var endpoint = `/device/state`;
+    var endpoint = '/device/scenes';
+    return this.request(endpoint, reqData, "post");
+  }
+
+  setDynamicScene(scene) {
+    var reqData = {
+      "requestId": "1",
+      "payload": {
+        "sku": this.sku,
+        "device": this.mac,
+        "capability": {
+          "type": "devices.capabilities.dynamic_scene",
+          "instance": "lightScene",
+          "value": scene
+        }
+      }
+    };
+    var endpoint = '/device/control';
+    return this.request(endpoint, reqData, "post");
+  }
+
+  getDIYScenes() {
+    var reqData = {
+      "requestId": "uuid",
+      "payload": {
+        "sku": this.sku,
+        "device": this.mac,
+      }
+    };
+    var endpoint = '/device/diy-scenes';
+    return this.request(endpoint, reqData, "post");
+  }
+
+  setDIYScene(scene) {
+    var reqData = {
+      "requestId": "1",
+      "payload": {
+        "sku": this.sku,
+        "device": this.mac,
+        "capability": {
+          "type": "devices.capabilities.dynamic_scene",
+          "instance": "diyScene",
+          "value": scene
+        }
+      }
+    };
+    var endpoint = '/device/control';
     return this.request(endpoint, reqData, "post");
   }
 
@@ -310,6 +373,17 @@ class GoveeLED {
     return resData;
   }
 
+  getState() {
+    var reqData = {
+      "requestId": "uuid",
+      "payload": {
+        "sku": this.sku,
+        "device": this.mac
+      }
+    };
+    var endpoint = `/device/state`;
+    return this.request(endpoint, reqData, "post");
+  }
 };
 
 module.exports = GoveeLED;

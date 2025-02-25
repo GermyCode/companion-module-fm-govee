@@ -244,8 +244,8 @@ module.exports = {
           id: 'colortype',
           default: 'rgb',
           choices: [
-              { id: 'rgb', label: 'RGB Color' },
-              { id: 'kelvin', label: 'Kelvin Temperature' }
+            { id: 'rgb', label: 'RGB Color' },
+            { id: 'kelvin', label: 'Kelvin Temperature' }
           ]
         },
         {
@@ -391,6 +391,54 @@ module.exports = {
       }
     }
 
+    actions.snapshot = {
+      name: 'Snapshot',
+      options: [{
+        type: 'dropdown',
+        label: 'Snapshot',
+        id: 'snapshot',
+        choices: [
+          { id: 'rgb', label: 'RGB Color' },
+          { id: 'kelvin', label: 'Kelvin Temperature' }
+        ]
+      }],
+      callback: async function (action) {
+        
+      }
+    }
+
+    actions.dynamicScene = {
+      name: 'Scene',
+      options: [{
+        type: 'dropdown',
+        label: 'Scene',
+        id: 'dynamicscene',
+        choices: [
+          { id: 'rgb', label: 'RGB Color' },
+          { id: 'kelvin', label: 'Kelvin Temperature' }
+        ]
+      }],
+      callback: async function (action) {
+        
+      }
+    }
+
+    actions.DIYScene = {
+      name: 'DIY Scene',
+      options: [{
+        type: 'dropdown',
+        label: 'Scene',
+        id: 'diyscene',
+        choices: [
+          { id: 'rgb', label: 'RGB Color' },
+          { id: 'kelvin', label: 'Kelvin Temperature' }
+        ]
+      }],
+      callback: async function (action) {
+        
+      }
+    }
+
     actions.getINFO = {
       name: 'Get INFO',
       options: [
@@ -410,8 +458,8 @@ module.exports = {
         }
         if (action.options.debugINFO !== '') {
           // Check if the key exists in self.INFO
-          if (self.INFO.hasOwnProperty(action.options.debugINFO)) {
-            self.log('info', `INFO (${action.options.debugINFO}): ` + JSON.stringify(self.INFO[action.options.debugINFO], null, 2));
+          if (self.hasOwnProperty(action.options.debugINFO)) {
+            self.log('info', `INFO (${action.options.debugINFO}): ` + JSON.stringify(self[action.options.debugINFO], null, 2));
           } else {
             self.log('warn', `INFO: Key '${action.options.debugINFO}' not found in self.INFO`);
           }

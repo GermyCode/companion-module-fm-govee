@@ -8,6 +8,7 @@ module.exports = {
 		let self = this;
 
 		if (self.config.api_key !== '') {
+			// self.buildDeviceList();
 			if (self.config.govee_device === 'select') {
 				if (self.GOVEE_DEVICES[0].id == 'select' && self.GOVEE_DEVICES.length < 3) { //the list hasn't been loaded yet if there's only 2 entries
 					//just get the list of available devices and update the config with the list so they can choose one
@@ -175,14 +176,113 @@ module.exports = {
 						color: ''
 					};
 				}
+				// do snapshot stuff here
+				// Loop through capabilities to find snapshots
+        for (let capabilities of goveeDevice.capabilities) {
+          if (capabilities.instance === "snapshot") {
+						
+						self.log('info', JSON.stringify(capabilities), null, 2);
+						self.SNAPSHOTS = self.buildSnapDIYList.bind(self)(capabilities);
+
+          }
+          // getting the max segments
+          else if (capabilities.type === "devices.capabilities.segment_color_setting") {
+            for (let field of capabilities.parameters.fields) {
+              if (field.fieldName === "segment" && field.size) {
+                goveeDevice.maxsegments = field.size.max - 1;
+              }
+            }
+          }
+        }
+
         self.initActions();
       }
 			else {
 				self.log('error', `Invalid Govee Device Selected: ${mac}`);
 			}
-		}).catch(function(error) {
-			self.processError(error);
-		});
+		}).catch(function(error) {self.processError(error);});
+
+		// do things with the dynamic scenes
+		self.GOVEE.getDynamicScenes().then(function(data) {
+			self.updateApiCalls('getdynamicscenes');
+			self.buildDynamicSceneList.bind(self)(data);
+
+			//loop through govee devices, find ours, and grab its data
+			let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
+			if (goveeDevice) {
+
+			}
+			else {
+				self.log('error', `Invalid Govee Device Selected: ${mac}`);
+			}
+		}).catch(function(error) {self.processError(error);});
+
+		// do things with the diy scenes
+		self.GOVEE.getDIYScenes().then(function(data) {
+			self.updateApiCalls('getdiyscenes');
+			//self.buildSnapDIYList.bind(self)(data);
+
+			//loop through govee devices, find ours, and grab its data
+			let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
+			if (goveeDevice) {
+
+			}
+			else {
+				self.log('error', `Invalid Govee Device Selected: ${mac}`);
+			}
+		}).catch(function(error) {self.processError(error);});
+	},
+
+	buildSnapDIYList: function (data) {
+		let self = this;
+		self.log('info', 'data ' + JSON.stringify(data), null, 2);
+		self.log('info', 'data pram opt ' + JSON.stringify(data.parameters.options), null, 2);
+		if (data.parameters.options.length > 0) {
+			let scenes = [];
+
+			let selectSceneObj = {};
+			selectSceneObj.id = 'select';
+			selectSceneObj.label = '(Select a Scene)';
+			scenes.push(selectSceneObj);
+
+			for (let i = 0; i < data.parameters.options.length; i++) {
+				let sceneObj = { ...data.parameters.options[i] };
+				// let sceneObj;
+				// self.log('info', 'data pram opt val ' + JSON.stringify(data.parameters.options[i].value), null, 2);
+				// self.log('info', 'data pram opt name ' + JSON.stringify(data.parameters.options[i].name), null, 2);
+				self.log('info', 'sceneobj ' + JSON.stringify(sceneObj), null, 2);
+				sceneObj.id = sceneObj.value;
+				sceneObj.label = sceneObj.name;
+				self.log('info', 'name ' + sceneObj.id);
+				self.log('info', 'name ' + sceneObj.label);
+				self.log('info', 'sceneobj 2 ' + JSON.stringify(sceneObj), null, 2);
+				scenes.push(sceneObj);
+				self.log('info', 'scenes ' + JSON.stringify(scenes), null, 2);
+			}
+			return scenes;
+		}
+	},
+
+	buildDynamicSceneList: function (data) {
+		let self = this;
+		if (data.length > 0) {
+			let scenes = [];
+
+			let selectSceneObj = {};
+			selectSceneObj.id = 'select';
+			selectSceneObj.label = '(Select a Scene)';
+			scenes.push(selectSceneObj);
+
+			for (let i = 0; i < data.length; i++) {
+        let sceneObj = { ...data[i] };
+        sceneObj.id = data[i].value;
+        sceneObj.label = data[i].name;
+				sceneObj.paramid = data[i].paramId;
+
+        scenes.push(sceneObj);
+      }
+			self.DYNAMIC_SCENES = scenes;
+		}
 	},
 
 	getState: function () {

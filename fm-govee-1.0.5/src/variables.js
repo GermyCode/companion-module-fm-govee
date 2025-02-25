@@ -14,7 +14,9 @@ module.exports = {
     variables.push({ variableId: 'minkelvin', name: 'Min Kelvin Temperature' })
 		variables.push({ variableId: 'maxkelvin', name: 'Max Kelvin Temperature' })
 		variables.push({ variableId: 'maxsegments', name: 'Max Number of Segments' })
-
+		variables.push({ variableId: 'snapshot', name: 'Current Snapshot' })
+		variables.push({ variableId: 'dynamicscene', name: 'Current Dynamic Scene' })
+		variables.push({ variableId: 'diyscene', name: 'Current DIY Scene' })
 
 		//variables.push({ variableId: 'api_calls_remaining', name: 'API Calls Remaining' })
 
@@ -33,6 +35,9 @@ module.exports = {
       variableObj.minkelvin = self.INFO.minkelvin;
       variableObj.maxkelvin = self.INFO.maxkelvin;
       variableObj.maxsegments = self.INFO.maxsegments;
+			variableObj.snapshot = self.INFO.snapshot;
+			variableObj.dynamicscene = self.INFO.dynamicscene;
+			variableObj.diyscene = self.INFO.diyscene;
 
 			self.setVariableValues(variableObj);
 		}
