@@ -1,7 +1,6 @@
 const { combineRgb, splitRgb } = require('@companion-module/base');
 
 const colorsys = require('colorsys');
-const GoveeLED = require('./goveeAPI');
 
 module.exports = {
 	initActions: function () {
@@ -451,7 +450,7 @@ module.exports = {
           let selectedDIYScene = self.DIY_SCENES.find(diy => diy.id == action.options.diyscene);
           if (selectedDIYScene) {
             self.log('info', `DIY Scene Selected: ${selectedDIYScene.label} (ID: ${selectedDIYScene.id})`);
-            self.GOVEE.setDynamicScene(action.options.diyscene);
+            self.GOVEE.setDIYScene(selectedDIYScene.id);
             self.updateApiCalls('setdiyscene');
             self.INFO.power = 'on';
             self.INFO.color = '';
@@ -498,6 +497,23 @@ module.exports = {
           }
         } else {
           self.log('warn', 'Please select an available Dynamic Scene');
+        }
+      }
+    }
+
+    actions.refreshDevice = {
+      name: 'Refresh Device',
+      callback: async function (action) {
+        if (self.GOVEE_DEVICES.length > 2) {
+          let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === self.GOVEE.mac);
+          if (goveeDevice) {
+            self.log('info', 'Refreshing Device');
+            self.GOVEE.getInformation(self.GOVEE.mac);
+          } else {
+            self.log('error', 'Can\'t refresh device. Device not found');
+          }
+        } else {
+          self.log('error', 'Can\'t refresh device. Make sure a device is selected');
         }
       }
     }

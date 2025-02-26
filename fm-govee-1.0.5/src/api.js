@@ -12,6 +12,7 @@ module.exports = {
 				if (self.GOVEE_DEVICES[0].id == 'select' && self.GOVEE_DEVICES.length < 3) { //the list hasn't been loaded yet if there's only 2 entries
 					//just get the list of available devices and update the config with the list so they can choose one
 					self.GOVEE = new Govee({apiKey: self.config.api_key, mac: '', sku: ''});
+          self.GOVEE.getInformation = self.getInformation.bind(self);
 					self.getGoveeDevices();
 				}
 			}
@@ -19,6 +20,7 @@ module.exports = {
 				//they selected manual, so load it the manual way
 				if (self.config.device_mac !== '' && self.config.sku !== '') {
 					self.GOVEE = new Govee({apiKey: self.config.api_key, mac: self.config.device_mac, sku: self.config.sku});
+          self.GOVEE.getInformation = self.getInformation.bind(self);
 					self.getInformation(self.config.device_mac); //get information once on startup
 					self.setupInterval();
 				}
@@ -32,6 +34,7 @@ module.exports = {
             if (goveeDevice) {
               self.updateStatus(InstanceStatus.Ok, 'Connected to ' + goveeDevice.label);
               self.GOVEE = new Govee({apiKey: self.config.api_key, mac: goveeDevice.id, sku: goveeDevice.sku});
+              self.GOVEE.getInformation = self.getInformation.bind(self);
               self.getInformation(goveeDevice.id); //get information once on startup
               self.setupInterval();
             }
@@ -135,7 +138,7 @@ module.exports = {
 		let self = this;
     self.GOVEE.getDevices().then(function(data) {
       self.updateApiCalls('getdevices');
-      self.buildDeviceList.bind(self)(data);
+      self.buildDeviceList(data);
 
       //loop through govee devices, find ours, and grab its data
       let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
@@ -191,7 +194,7 @@ module.exports = {
         // Loop through capabilities to find snapshots
         for (let capabilities of goveeDevice.capabilities) {
           if (capabilities.instance === "snapshot") {
-            self.SNAPSHOTS = self.buildSnapDIYList.bind(self)(capabilities);
+            self.SNAPSHOTS = self.buildSnapDIYList(capabilities);
           }
           // getting the max segments
           else if (capabilities.type === "devices.capabilities.segment_color_setting") {
@@ -217,7 +220,7 @@ module.exports = {
       if (goveeDevice) {
         for (let capabilities of data.payload.capabilities) {
           if (capabilities.instance === "diyScene") {  
-            self.DIY_SCENES = self.buildSnapDIYList.bind(self)(capabilities);
+            self.DIY_SCENES = self.buildSnapDIYList(capabilities);
           }
         }
       }
@@ -234,7 +237,7 @@ module.exports = {
       if (goveeDevice) {
         for (let capabilities of data.payload.capabilities) {
           if (capabilities.instance === "lightScene") {
-            self.DYNAMIC_SCENES = self.buildDynamicSceneList.bind(self)(capabilities);
+            self.DYNAMIC_SCENES = self.buildDynamicSceneList(capabilities);
           }
         }
       }
