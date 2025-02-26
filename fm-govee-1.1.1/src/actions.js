@@ -518,7 +518,7 @@ module.exports = {
       }
     }
 
-    actions.getINFO = {
+    actions.getDebugInfo = {
       name: 'Get debug',
       options: [
         {

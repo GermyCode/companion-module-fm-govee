@@ -1,6 +1,6 @@
 {
-	"id": "",
-	"name": "",
+	"id": "fm-govee",
+	"name": "fm-govee",
 	"shortname": "FM-Govee",
 	"description": "Companion module for controlling Govee lights at FM",
 	"version": "1.1.1",
@@ -21,11 +21,6 @@
 		"entrypoint": "../index.js"
 	},
 	"manufacturer": "FM",
-	"products": [
-		"Govee"
-	],
-	"keywords": [
-		"lights",
-		"lighting"
-	]
+	"products": [ "Govee" ],
+	"keywords": [ "lights", "lighting" ]
 }
