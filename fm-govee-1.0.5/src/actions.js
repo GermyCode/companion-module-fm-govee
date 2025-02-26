@@ -158,9 +158,10 @@ module.exports = {
             } else {
               self.updateApiCalls('segmentbrightness');
             }
-            // self.INFO.power = 'on';
-            // self.checkVariables();
-            // self.checkFeedbacks();
+            self.INFO.power = 'on';
+            self.INFO.snapshot = '';
+            self.checkVariables();
+            self.checkFeedbacks();
             for (let segId of segArray) {
               if (segmentKeys.includes(segId)) {
                 self.INFO.segments[`segment ${segId}`].brightness = action.options.segbrightness;
@@ -280,11 +281,15 @@ module.exports = {
               self.updateApiCalls('setcolorrgb');
               self.INFO.power = 'on';
               self.INFO.color = '(R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')';
+              self.INFO.snapshot = '';
               self.checkVariables();
               self.checkFeedbacks();
             }).catch((error) => {
               self.processError(error);
             });
+            for (let key in self.INFO.segments) {
+              self.INFO.segments[key].color = ''; // remove each segment's color
+          }
           }
           catch(error) {
             //probably error converting to hex
@@ -303,6 +308,7 @@ module.exports = {
               self.updateApiCalls('colortemperature');
               self.INFO.power = 'on';
               self.INFO.color = kelvin + "K";
+              self.INFO.snapshot = '';
               self.checkVariables();
               self.checkFeedbacks();
             }).catch((error) => {
@@ -325,9 +331,9 @@ module.exports = {
       options: [
         {
 					type: 'textinput',
-					label: 'Segment: 0,1,..,' + (`${self.getVariableValue('maxsegments')}`-1),
+					label: `Segment: 0,1,..,${self.GOVEE.sku === 'H60A1' ? self.getVariableValue('maxsegments')-1 : self.getVariableValue('maxsegments')}`,
 					id: 'numofseg',
-					default: '1,2,3',
+					default: '0,1,2',
 					required: true,
 				},
         {
@@ -373,9 +379,10 @@ module.exports = {
                   self.log('warn', `Segment ${segId} not found in self.INFO.segments`);
                 }
               }
-              // self.INFO.power = 'on';
-              // self.checkVariables();
-              // self.checkFeedbacks();
+              self.INFO.power = 'on';
+              self.INFO.snapshot = '';
+              self.checkVariables();
+              self.checkFeedbacks();
             }).catch((error) => {
               self.processError(error);
             });
@@ -397,31 +404,33 @@ module.exports = {
         type: 'dropdown',
         label: 'Snapshot',
         id: 'snapshot',
-        choices: [
-          { id: 'rgb', label: 'RGB Color' },
-          { id: 'kelvin', label: 'Kelvin Temperature' }
-        ]
+        default: 'select',
+        choices: self.SNAPSHOTS
       }],
       callback: async function (action) {
-        
+        if (action.options.snapshot !== 'select') {
+          // Find the matching snapshot object
+          let selectedSnapshot = self.SNAPSHOTS.find(snap => snap.id == action.options.snapshot);
+          if (selectedSnapshot) {
+            // self.log('info', `Snapshot Selected: ${selectedSnapshot.label} (ID: ${selectedSnapshot.id})`);
+            self.GOVEE.setSnapshot(action.options.snapshot);
+            self.updateApiCalls('setsnapshot');
+            self.INFO.power = 'on';
+            self.INFO.color = '';
+            self.INFO.snapshot = selectedSnapshot.label;
+            self.INFO.dynamicscene = '';
+            self.INFO.diyscene = '';
+            self.checkVariables();
+            self.checkFeedbacks();
+          } else {
+            self.log('error', `Snapshot with ID ${action.options.snapshot} not found`);
+          }
+        } else {
+          self.log('warn', 'Please select an available snapshot');
+        }
       }
-    }
+    };
 
-    actions.dynamicScene = {
-      name: 'Scene',
-      options: [{
-        type: 'dropdown',
-        label: 'Scene',
-        id: 'dynamicscene',
-        choices: [
-          { id: 'rgb', label: 'RGB Color' },
-          { id: 'kelvin', label: 'Kelvin Temperature' }
-        ]
-      }],
-      callback: async function (action) {
-        
-      }
-    }
 
     actions.DIYScene = {
       name: 'DIY Scene',
@@ -429,18 +438,68 @@ module.exports = {
         type: 'dropdown',
         label: 'Scene',
         id: 'diyscene',
-        choices: [
-          { id: 'rgb', label: 'RGB Color' },
-          { id: 'kelvin', label: 'Kelvin Temperature' }
-        ]
+        default: 'select',
+        choices: self.DIY_SCENES
       }],
       callback: async function (action) {
-        
+        if (action.options.diyscene !== 'select') {
+          // Find the matching diyscene object
+          let selectedDIYScene = self.DIY_SCENES.find(diy => diy.id == action.options.diyscene);
+          if (selectedDIYScene) {
+            self.log('info', `DIY Scene Selected: ${selectedDIYScene.label} (ID: ${selectedDIYScene.id})`);
+            self.GOVEE.setDynamicScene(action.options.diyscene);
+            self.updateApiCalls('setdiyscene');
+            self.INFO.power = 'on';
+            self.INFO.color = '';
+            self.INFO.snapshot = '';
+            self.INFO.dynamicscene = '';
+            self.INFO.diyscene = selectedDIYScene.label;
+            self.checkVariables();
+            self.checkFeedbacks();
+          } else {
+            self.log('error', `DIY Scene with ID ${action.options.diyscene} not found`);
+          }
+        } else {
+          self.log('warn', 'Please select an available DIY Scene');
+        }
+      }
+    }
+
+    actions.dynamicScene = {
+      name: 'Dynamic Scene',
+      options: [{
+        type: 'dropdown',
+        label: 'Scene',
+        id: 'dynamicscene',
+        default: 'select',
+        choices: self.DYNAMIC_SCENES
+      }],
+      callback: async function (action) {
+        if (action.options.dynamicscene !== 'select') {
+          // Find the matching dynamicscene object
+          let selectedDynamicScene = self.DYNAMIC_SCENES.find(dyn => dyn.id == action.options.dynamicscene);
+          if (selectedDynamicScene) {
+            self.log('info', `Dynamic Scene Selected: ${selectedDynamicScene.label} (ID: ${selectedDynamicScene.id})`);
+            self.GOVEE.setDynamicScene(action.options.dynamicscene);
+            self.updateApiCalls('setdynamicscene');
+            self.INFO.power = 'on';
+            self.INFO.color = '';
+            self.INFO.snapshot = '';
+            self.INFO.dynamicscene = selectedDynamicScene.label;
+            self.INFO.diyscene = '';
+            self.checkVariables();
+            self.checkFeedbacks();
+          } else {
+            self.log('error', `Dynamic Scene with ID ${action.options.dynamicscene} not found`);
+          }
+        } else {
+          self.log('warn', 'Please select an available Dynamic Scene');
+        }
       }
     }
 
     actions.getINFO = {
-      name: 'Get INFO',
+      name: 'Get debug',
       options: [
         {
           type: 'textinput',

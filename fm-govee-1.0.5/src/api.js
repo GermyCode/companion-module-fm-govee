@@ -8,7 +8,6 @@ module.exports = {
 		let self = this;
 
 		if (self.config.api_key !== '') {
-			// self.buildDeviceList();
 			if (self.config.govee_device === 'select') {
 				if (self.GOVEE_DEVICES[0].id == 'select' && self.GOVEE_DEVICES.length < 3) { //the list hasn't been loaded yet if there's only 2 entries
 					//just get the list of available devices and update the config with the list so they can choose one
@@ -26,24 +25,29 @@ module.exports = {
 			}
 			else {
 				//they selected a device, so load it
-				let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === self.config.govee_device);
-				if (goveeDevice) {
-					self.updateStatus(InstanceStatus.Ok, 'Connected to ' + goveeDevice.label);
-					self.GOVEE = new Govee({apiKey: self.config.api_key, mac: goveeDevice.id, sku: goveeDevice.sku});
-					self.getInformation(goveeDevice.id); //get information once on startup
-					self.setupInterval();
-				}
-				else {
-					//self.log('error', 'Invalid Govee Device Selected.');
-					self.GOVEE = new Govee({apiKey: self.config.api_key, mac: '', sku: ''});
-					self.getGoveeDevices();
-				}
-			}
-		}
-		else {
-			self.log('error', 'No API Key Specified.');
-		}
-	},
+				self.GOVEE = new Govee({apiKey: self.config.api_key, mac: '', sku: ''});
+        self.getGoveeDevices().then(function(devices) {
+          if (devices.length > 2) {
+            let goveeDevice = devices.find(device => device.id === self.config.govee_device);
+            if (goveeDevice) {
+              self.updateStatus(InstanceStatus.Ok, 'Connected to ' + goveeDevice.label);
+              self.GOVEE = new Govee({apiKey: self.config.api_key, mac: goveeDevice.id, sku: goveeDevice.sku});
+              self.getInformation(goveeDevice.id); //get information once on startup
+              self.setupInterval();
+            }
+            else {
+              self.log('error', 'Invalid Govee Device Selected.');
+            }
+          } else {
+            self.log('error', 'No devices detected. Check the API key');
+          }
+        }).catch(function(error) { console.log(error); });
+      }
+    }
+    else {
+      self.log('error', 'No API Key Specified.');
+    }
+  },
 	
 	setupInterval: function() {
 		let self = this;
@@ -68,31 +72,34 @@ module.exports = {
 
 	getGoveeDevices: function () {
 		let self = this;
+    return new Promise((resolve, reject) => {
+      self.log('info', 'Fetching Govee Devices...');
 
-		self.log('info', 'Getting Govee Devices on Network.');
+      self.GOVEE.getDevices().then(function(data) {
+        self.updateApiCalls('getdevices');
+        self.buildDeviceList.bind(self)(data);
+        self.log('info', `Devices Fetched: ${self.GOVEE_DEVICES.length}`);
 
-		self.GOVEE.getDevices().then(function(data) {
-			self.updateApiCalls('getdevices');
-			self.log('info', 'Govee Devices Auto-Detected.');
-			self.buildDeviceList.bind(self)(data);
-			
-			//might need to do a check here to see if the device they had selected is still in the list, if not, change it back to 'select'
-			if (self.config.govee_device !== 'select' && self.config.govee_device !== 'manual') {
-				let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === self.config.govee_device);
-				if (!goveeDevice) {
-					self.config.govee_device = 'select';
-					self.getConfigFields();
-					self.configUpdated(self.config);
-					self.updateStatus(InstanceStatus.Connecting, 'Devices Auto-Detected. Please select a device.');
-				}
-				else {
-					self.GOVEE = new Govee({apiKey: self.config.api_key, mac: goveeDevice.id, sku: goveeDevice.sku});
-					self.updateStatus(InstanceStatus.Ok);
-				}
-			}
-		}).catch(function(error) {
-			console.log(error);
-		});
+        //might need to do a check here to see if the device they had selected is still in the list, if not, change it back to 'select'
+        if (self.config.govee_device !== 'select' && self.config.govee_device !== 'manual') {
+          let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === self.config.govee_device);
+          if (!goveeDevice) {
+            self.config.govee_device = 'select';
+            self.getConfigFields();
+            self.configUpdated(self.config);
+            self.updateStatus(InstanceStatus.Connecting, 'Devices Auto-Detected. Please select a device.');
+          }
+          else {
+            self.GOVEE = new Govee({apiKey: self.config.api_key, mac: goveeDevice.id, sku: goveeDevice.sku});
+            self.updateStatus(InstanceStatus.Ok);
+          }
+        }
+        resolve(self.GOVEE_DEVICES); // Return the devices
+      }).catch((error) => {
+        self.log('error', 'Error fetching devices: ' + error);
+        reject(error);
+      });
+    });
 	},
 
 	buildDeviceList: function (data) {
@@ -126,14 +133,18 @@ module.exports = {
 	getInformation: async function (mac) {
 		//Get all information from Device
 		let self = this;
+    self.GOVEE.getDevices().then(function(data) {
+      self.updateApiCalls('getdevices');
+      self.buildDeviceList.bind(self)(data);
 
-		self.GOVEE.getDevices().then(function(data) {
-			self.updateApiCalls('getdevices');
-			self.buildDeviceList.bind(self)(data);
-
-			//loop through govee devices, find ours, and grab its data
-			let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
-			if (goveeDevice) {
+      //loop through govee devices, find ours, and grab its data
+      let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
+      if (goveeDevice) {
+        // do getState() stuff here to update variables
+        //
+        //
+        //
+        //
         // Loop through capabilities to find colorTemperatureK
         for (let capabilities of goveeDevice.capabilities) {
           if (capabilities.instance === "colorTemperatureK") {
@@ -150,40 +161,37 @@ module.exports = {
           }
         }
 
-				let segments = goveeDevice.maxsegments;
-				// thing with the H60A1 where it has more segments than the api allows
-				// also it shows 12 segments instead of 13, 13 being the main light
-				if (self.GOVEE.sku === "H60A1") {
-					segments += 1;
-				}
+        let segments = goveeDevice.maxsegments;
+        // thing with the H60A1 where it has more segments than the api allows
+        // also it shows 12 segments instead of 13, 13 being the main light
+        if (self.GOVEE.sku === "H60A1") {
+          segments += 1;
+        }
 
-				self.INFO.maxsegments = segments;
-				self.INFO.minkelvin = goveeDevice.minkelvin;
-				self.INFO.maxkelvin = goveeDevice.maxkelvin;
+        self.INFO.maxsegments = segments;
+        self.INFO.minkelvin = goveeDevice.minkelvin;
+        self.INFO.maxkelvin = goveeDevice.maxkelvin;
 
-				let variableObj = {
-					'device': goveeDevice.device,
-					'sku': goveeDevice.sku,
-					'device_name': goveeDevice.deviceName,
-					'minkelvin': goveeDevice.minkelvin ?? 2000,
-					'maxkelvin': goveeDevice.maxkelvin ?? 6500,
-					'maxsegments': segments ?? 0
-				};
-				self.setVariableValues(variableObj);
-				for (let i = 0; i < segments + 1; i++) {
-					self.INFO.segments['segment ' + i] = {
-						brightness: '',
-						color: ''
-					};
-				}
-				// do snapshot stuff here
-				// Loop through capabilities to find snapshots
+        let variableObj = {
+          'device': goveeDevice.device,
+          'sku': goveeDevice.sku,
+          'device_name': goveeDevice.deviceName,
+          'minkelvin': goveeDevice.minkelvin ?? 2000,
+          'maxkelvin': goveeDevice.maxkelvin ?? 6500,
+          'maxsegments': segments ?? 0
+        };
+        self.setVariableValues(variableObj);
+        for (let i = 0; i < segments + 1; i++) {
+          self.INFO.segments['segment ' + i] = {
+            brightness: '',
+            color: ''
+          };
+        }
+        // do snapshot stuff here
+        // Loop through capabilities to find snapshots
         for (let capabilities of goveeDevice.capabilities) {
           if (capabilities.instance === "snapshot") {
-						
-						self.log('info', JSON.stringify(capabilities), null, 2);
-						self.SNAPSHOTS = self.buildSnapDIYList.bind(self)(capabilities);
-
+            self.SNAPSHOTS = self.buildSnapDIYList.bind(self)(capabilities);
           }
           // getting the max segments
           else if (capabilities.type === "devices.capabilities.segment_color_setting") {
@@ -194,96 +202,86 @@ module.exports = {
             }
           }
         }
-
         self.initActions();
       }
-			else {
-				self.log('error', `Invalid Govee Device Selected: ${mac}`);
-			}
-		}).catch(function(error) {self.processError(error);});
+      else {
+        self.log('error', `Invalid Govee Device Selected: ${mac}`);
+      }
+    }).catch(function(error) {self.processError(error);});
 
-		// do things with the dynamic scenes
-		self.GOVEE.getDynamicScenes().then(function(data) {
-			self.updateApiCalls('getdynamicscenes');
-			self.buildDynamicSceneList.bind(self)(data);
+    // do things with the diy scenes
+    self.GOVEE.getDIYScenes().then(function(data) {
+      self.updateApiCalls('getdiyscenes');
+      //loop through govee devices, find ours, and grab its data
+      let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
+      if (goveeDevice) {
+        for (let capabilities of data.payload.capabilities) {
+          if (capabilities.instance === "diyScene") {  
+            self.DIY_SCENES = self.buildSnapDIYList.bind(self)(capabilities);
+          }
+        }
+      }
+      else {
+        self.log('error', `Invalid Govee Device Selected: ${mac}`);
+      }
+    }).catch(function(error) {self.processError(error);});
 
-			//loop through govee devices, find ours, and grab its data
-			let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
-			if (goveeDevice) {
-
-			}
-			else {
-				self.log('error', `Invalid Govee Device Selected: ${mac}`);
-			}
-		}).catch(function(error) {self.processError(error);});
-
-		// do things with the diy scenes
-		self.GOVEE.getDIYScenes().then(function(data) {
-			self.updateApiCalls('getdiyscenes');
-			//self.buildSnapDIYList.bind(self)(data);
-
-			//loop through govee devices, find ours, and grab its data
-			let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
-			if (goveeDevice) {
-
-			}
-			else {
-				self.log('error', `Invalid Govee Device Selected: ${mac}`);
-			}
-		}).catch(function(error) {self.processError(error);});
+    // do things with the dynamic scenes
+    self.GOVEE.getDynamicScenes().then(function(data) {
+      self.updateApiCalls('getdynamicscenes');
+      //loop through govee devices, find ours, and grab its data
+      let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
+      if (goveeDevice) {
+        for (let capabilities of data.payload.capabilities) {
+          if (capabilities.instance === "lightScene") {
+            self.DYNAMIC_SCENES = self.buildDynamicSceneList.bind(self)(capabilities);
+          }
+        }
+      }
+      else {
+        self.log('error', `Invalid Govee Device Selected: ${mac}`);
+      }
+    }).catch(function(error) {self.processError(error);});
 	},
 
 	buildSnapDIYList: function (data) {
 		let self = this;
-		self.log('info', 'data ' + JSON.stringify(data), null, 2);
-		self.log('info', 'data pram opt ' + JSON.stringify(data.parameters.options), null, 2);
-		if (data.parameters.options.length > 0) {
-			let scenes = [];
-
-			let selectSceneObj = {};
-			selectSceneObj.id = 'select';
-			selectSceneObj.label = '(Select a Scene)';
-			scenes.push(selectSceneObj);
-
+		let scenes = [];
+    // Ensure data exists and contains the expected structure
+    if (data.parameters && data.parameters.options.length > 0) {
+      // Add default "Select a Scene" option
+			scenes.push({ id: 'select', label: '(Select a Scene)' });
 			for (let i = 0; i < data.parameters.options.length; i++) {
 				let sceneObj = { ...data.parameters.options[i] };
-				// let sceneObj;
-				// self.log('info', 'data pram opt val ' + JSON.stringify(data.parameters.options[i].value), null, 2);
-				// self.log('info', 'data pram opt name ' + JSON.stringify(data.parameters.options[i].name), null, 2);
-				self.log('info', 'sceneobj ' + JSON.stringify(sceneObj), null, 2);
-				sceneObj.id = sceneObj.value;
-				sceneObj.label = sceneObj.name;
-				self.log('info', 'name ' + sceneObj.id);
-				self.log('info', 'name ' + sceneObj.label);
-				self.log('info', 'sceneobj 2 ' + JSON.stringify(sceneObj), null, 2);
-				scenes.push(sceneObj);
-				self.log('info', 'scenes ' + JSON.stringify(scenes), null, 2);
+        let sceneObj2 = {};
+        sceneObj2.id = sceneObj.value
+        sceneObj2.label = sceneObj.name
+				scenes.push(sceneObj2);
 			}
-			return scenes;
 		}
+    return scenes;
 	},
 
 	buildDynamicSceneList: function (data) {
-		let self = this;
-		if (data.length > 0) {
-			let scenes = [];
-
-			let selectSceneObj = {};
-			selectSceneObj.id = 'select';
-			selectSceneObj.label = '(Select a Scene)';
-			scenes.push(selectSceneObj);
-
-			for (let i = 0; i < data.length; i++) {
-        let sceneObj = { ...data[i] };
-        sceneObj.id = data[i].value;
-        sceneObj.label = data[i].name;
-				sceneObj.paramid = data[i].paramId;
-
+    let self = this;
+    let scenes = [];
+    // Ensure data exists and contains the expected structure
+    if (data.parameters && data.parameters.options.length > 0) {
+      // Add default "Select a Scene" option
+      scenes.push({ id: 'select', label: '(Select a Scene)' });
+      for (let i = 0; i < data.parameters.options.length; i++) {
+        let scene = data.parameters.options[i]; 
+        let sceneObj = {
+          id: scene.value.id, 
+          label: scene.name,
+        };
         scenes.push(sceneObj);
       }
-			self.DYNAMIC_SCENES = scenes;
-		}
-	},
+      // Sort scenes alphabetically by label (ignoring the default option)
+      scenes = [scenes[0], ...scenes.slice(1).sort((a, b) => a.label.localeCompare(b.label))];
+    }
+    return scenes;
+  },
 
 	getState: function () {
 		let self = this;

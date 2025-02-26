@@ -362,12 +362,10 @@ class GoveeLED {
 
     let resData;
 
-    await axios(config)
-    .then(async function (response) {
+    await axios(config).then(async function (response) {
       resData = response.data.data;
-    })
-    .catch(function (error) {
-      throw new Error(error);
+    }).catch(function (error) { 
+      throw new Error(error); 
     });
 
     return resData;

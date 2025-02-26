@@ -34,11 +34,17 @@ class goveeInstance extends InstanceBase {
 			{ id: 'manual', label: 'Manually Enter Device MAC Address and Model' }
 		];
 
-		this.SNAPSHOTS = [{}];
+		this.SNAPSHOTS = [
+      { name: 'select', value: '(Select a Snapshot)' }
+    ];
 
-		this.DYNAMIC_SCENES = [{}];
+		this.DYNAMIC_SCENES = [
+      { name: 'select', value: '(Select a Scene)' }
+    ];
 
-		this.DIY_SCENES = [{}];
+		this.DIY_SCENES = [
+      { name: 'select', value: '(Select a Scene)' }
+    ];
 
 		this.INFO = {
 			power: 'off',
