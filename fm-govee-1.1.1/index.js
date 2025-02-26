@@ -35,15 +35,15 @@ class goveeInstance extends InstanceBase {
 		];
 
 		this.SNAPSHOTS = [
-      { name: 'select', value: '(Select a Snapshot)' }
+      { id: 'select', label: '(Select a Snapshot)' }
     ];
 
 		this.DYNAMIC_SCENES = [
-      { name: 'select', value: '(Select a Scene)' }
+      { id: 'select', label: '(Select a Scene)' }
     ];
 
 		this.DIY_SCENES = [
-      { name: 'select', value: '(Select a Scene)' }
+      { id: 'select', label: '(Select a Scene)' }
     ];
 
 		this.INFO = {

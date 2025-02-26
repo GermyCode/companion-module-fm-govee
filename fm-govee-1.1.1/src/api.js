@@ -194,7 +194,9 @@ module.exports = {
         // Loop through capabilities to find snapshots
         for (let capabilities of goveeDevice.capabilities) {
           if (capabilities.instance === "snapshot") {
-            self.SNAPSHOTS = self.buildSnapDIYList(capabilities);
+            if (capabilities.length > 0) {
+              self.SNAPSHOTS.push(self.buildSnapDIYList(capabilities));
+            }
           }
           // getting the max segments
           else if (capabilities.type === "devices.capabilities.segment_color_setting") {
@@ -219,8 +221,10 @@ module.exports = {
       let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
       if (goveeDevice) {
         for (let capabilities of data.payload.capabilities) {
-          if (capabilities.instance === "diyScene") {  
-            self.DIY_SCENES = self.buildSnapDIYList(capabilities);
+          if (capabilities.instance === "diyScene") {
+            if (capabilities.length > 0) {
+              self.DIY_SCENES = self.buildSnapDIYList(capabilities);
+            }
           }
         }
       }
@@ -237,7 +241,9 @@ module.exports = {
       if (goveeDevice) {
         for (let capabilities of data.payload.capabilities) {
           if (capabilities.instance === "lightScene") {
-            self.DYNAMIC_SCENES = self.buildDynamicSceneList(capabilities);
+            if (capabilities.length > 0) {
+              self.DYNAMIC_SCENES = self.buildDynamicSceneList(capabilities);
+            }
           }
         }
       }
@@ -253,7 +259,7 @@ module.exports = {
     // Ensure data exists and contains the expected structure
     if (data.parameters && data.parameters.options.length > 0) {
       // Add default "Select a Scene" option
-			scenes.push({ id: 'select', label: '(Select a Scene)' });
+			// scenes.push({ id: 'select', label: '(Select a Scene)' });
 			for (let i = 0; i < data.parameters.options.length; i++) {
 				let sceneObj = { ...data.parameters.options[i] };
         let sceneObj2 = {};

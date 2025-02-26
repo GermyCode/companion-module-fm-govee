@@ -117,7 +117,7 @@ module.exports = {
       options: [
         {
 					type: 'textinput',
-					label: `Segment: 0,1,..,${self.getVariableValue('maxsegments')}`,
+					label: `Segment: 0,1,..,${self.getVariableValue('maxsegments') > 14 ? '14' : self.getVariableValue('maxsegments')}`,
 					id: 'numofseg',
 					default: '0,1,2',
 					required: true,
