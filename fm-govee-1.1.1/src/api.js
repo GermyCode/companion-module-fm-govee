@@ -195,8 +195,7 @@ module.exports = {
         for (let capabilities of goveeDevice.capabilities) {
           if (capabilities.instance === "snapshot") {
             if (capabilities.parameters.options.length > 0) {
-              self.SNAPSHOTS = [{}]
-              self.SNAPSHOTS.push(self.buildSnapDIYList(capabilities));
+              self.SNAPSHOTS = self.buildSnapDIYList(capabilities);
             }
           }
           // getting the max segments
@@ -224,7 +223,7 @@ module.exports = {
         for (let capabilities of data.payload.capabilities) {
           if (capabilities.parameters.options.length === "diyScene") {
             if (capabilities.length > 0) {
-              self.DIY_SCENES = [{}]
+              self.DIY_SCENES = null;
               self.DIY_SCENES = self.buildSnapDIYList(capabilities);
             }
           }
@@ -244,7 +243,7 @@ module.exports = {
         for (let capabilities of data.payload.capabilities) {
           if (capabilities.instance === "lightScene") {
             if (capabilities.parameters.options.length > 0) {
-              self.DYNAMIC_SCENES = [{}]
+              self.DYNAMIC_SCENES = null;
               self.DYNAMIC_SCENES = self.buildDynamicSceneList(capabilities);
             }
           }
