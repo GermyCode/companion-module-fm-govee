@@ -195,6 +195,7 @@ module.exports = {
         for (let capabilities of goveeDevice.capabilities) {
           if (capabilities.instance === "snapshot") {
             if (capabilities.parameters.options.length > 0) {
+              self.SNAPSHOTS = [{}]
               self.SNAPSHOTS.push(self.buildSnapDIYList(capabilities));
             }
           }
@@ -223,6 +224,7 @@ module.exports = {
         for (let capabilities of data.payload.capabilities) {
           if (capabilities.parameters.options.length === "diyScene") {
             if (capabilities.length > 0) {
+              self.DIY_SCENES = [{}]
               self.DIY_SCENES = self.buildSnapDIYList(capabilities);
             }
           }
@@ -242,6 +244,7 @@ module.exports = {
         for (let capabilities of data.payload.capabilities) {
           if (capabilities.instance === "lightScene") {
             if (capabilities.parameters.options.length > 0) {
+              self.DYNAMIC_SCENES = [{}]
               self.DYNAMIC_SCENES = self.buildDynamicSceneList(capabilities);
             }
           }
@@ -259,7 +262,7 @@ module.exports = {
     // Ensure data exists and contains the expected structure
     if (data.parameters && data.parameters.options.length > 0) {
       // Add default "Select a Scene" option
-			// scenes.push({ id: 'select', label: '(Select a Scene)' });
+			scenes.push({ id: 'select', label: '(Select a Scene)' });
 			for (let i = 0; i < data.parameters.options.length; i++) {
 				let sceneObj = { ...data.parameters.options[i] };
         let sceneObj2 = {};
