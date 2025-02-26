@@ -282,6 +282,8 @@ module.exports = {
               self.INFO.power = 'on';
               self.INFO.color = '(R:' + color.r + ', G:' + color.g + ', B:' + color.b + ')';
               self.INFO.snapshot = '';
+              self.INFO.dynamicscene = '';
+              self.INFO.diyscene = '';
               self.checkVariables();
               self.checkFeedbacks();
             }).catch((error) => {
@@ -309,6 +311,8 @@ module.exports = {
               self.INFO.power = 'on';
               self.INFO.color = kelvin + "K";
               self.INFO.snapshot = '';
+              self.INFO.dynamicscene = '';
+              self.INFO.diyscene = '';
               self.checkVariables();
               self.checkFeedbacks();
             }).catch((error) => {
