@@ -194,7 +194,7 @@ module.exports = {
         // Loop through capabilities to find snapshots
         for (let capabilities of goveeDevice.capabilities) {
           if (capabilities.instance === "snapshot") {
-            if (capabilities.length > 0) {
+            if (capabilities.parameters.options.length > 0) {
               self.SNAPSHOTS.push(self.buildSnapDIYList(capabilities));
             }
           }
@@ -221,7 +221,7 @@ module.exports = {
       let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
       if (goveeDevice) {
         for (let capabilities of data.payload.capabilities) {
-          if (capabilities.instance === "diyScene") {
+          if (capabilities.parameters.options.length === "diyScene") {
             if (capabilities.length > 0) {
               self.DIY_SCENES = self.buildSnapDIYList(capabilities);
             }
@@ -241,7 +241,7 @@ module.exports = {
       if (goveeDevice) {
         for (let capabilities of data.payload.capabilities) {
           if (capabilities.instance === "lightScene") {
-            if (capabilities.length > 0) {
+            if (capabilities.parameters.options.length > 0) {
               self.DYNAMIC_SCENES = self.buildDynamicSceneList(capabilities);
             }
           }
