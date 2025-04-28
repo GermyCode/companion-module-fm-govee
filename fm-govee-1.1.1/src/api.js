@@ -221,10 +221,8 @@ module.exports = {
       let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === mac);
       if (goveeDevice) {
         for (let capabilities of data.payload.capabilities) {
-          if (capabilities.parameters.options.length === "diyScene") {
-            if (capabilities.length > 0) {
-              self.DIY_SCENES = self.buildSnapDIYList(capabilities);
-            }
+          if (Object.keys(capabilities).length > 0) {
+            self.DIY_SCENES = self.buildSnapDIYList(capabilities);
           }
         }
       }

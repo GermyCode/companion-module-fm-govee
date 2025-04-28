@@ -58,10 +58,10 @@ class goveeInstance extends InstanceBase {
 			snapshot: '',
 			dynamicscene: '',
 			diyscene: '',
-			api_calls_remaining: 10
+			api_calls_remaining: 5000
 		};
 
-		this.API_CALLS = []; //used to store the last 10 API calls
+		this.API_CALLS = []; //used to store the last 5000 API calls
 	}
 
 	async destroy() {

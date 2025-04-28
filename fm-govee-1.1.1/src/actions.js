@@ -525,14 +525,14 @@ module.exports = {
           type: 'textinput',
           label: 'Debug Key',
           id: 'debugINFO',
-          default: '',
+          default: 'INFO',
           required: false
         }
       ],
       callback: async function (action) {
         // Ensure self.INFO is initialized
         if (!self.INFO) {
-          self.log('error', 'self.INFO is not initialized yet!');
+          self.log('error', 'INFO is not initialized yet!');
           return;
         }
         if (action.options.debugINFO !== '') {
@@ -540,7 +540,7 @@ module.exports = {
           if (self.hasOwnProperty(action.options.debugINFO)) {
             self.log('info', `INFO (${action.options.debugINFO}): ` + JSON.stringify(self[action.options.debugINFO], null, 2));
           } else {
-            self.log('warn', `INFO: Key '${action.options.debugINFO}' not found in self.INFO`);
+            self.log('warn', `INFO: Key '${action.options.debugINFO}' not found`);
           }
         } else {
           // Log the entire self.INFO object
