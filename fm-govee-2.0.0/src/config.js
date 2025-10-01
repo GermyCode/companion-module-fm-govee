@@ -43,13 +43,22 @@ module.exports = {
 				default: 'H610A',
 				isVisible: (configValues) => configValues.govee_device === 'manual',
 			},
-			/*{
+			{
 				type: 'checkbox',
 				id: 'intervalEnabled',
 				label: 'Enable Update Interval (Periodically request new information from the device)',
 				width: 12,
 				default: false
-			},*/
+			},
+			{
+				type: 'number',
+				id: 'intervalAmmount',
+				label: 'How frequently to request data in ms. Default 60000ms = 1 minute. Minimum 500ms',
+				width: 12,
+				min: 500,
+				default: 60000,
+				isVisible: (c) => c.intervalEnabled === true
+			},
 			{
 				type: 'static-text',
 				id: 'info2',

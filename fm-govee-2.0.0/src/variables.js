@@ -11,7 +11,7 @@ module.exports = {
 		variables.push({ variableId: 'power', name: 'Last Set Power State' })
 		variables.push({ variableId: 'brightness', name: 'Last Set Brightness' })
 		variables.push({ variableId: 'color', name: 'Last Set Color' })
-    variables.push({ variableId: 'minkelvin', name: 'Min Kelvin Temperature' })
+		variables.push({ variableId: 'minkelvin', name: 'Min Kelvin Temperature' })
 		variables.push({ variableId: 'maxkelvin', name: 'Max Kelvin Temperature' })
 		variables.push({ variableId: 'maxsegments', name: 'Max Number of Segments' })
 		variables.push({ variableId: 'snapshot', name: 'Current Snapshot' })
@@ -32,9 +32,9 @@ module.exports = {
 			variableObj.power = self.INFO.power;
 			variableObj.brightness = self.INFO.brightness;
 			variableObj.color = self.INFO.color;
-      variableObj.minkelvin = self.INFO.minkelvin;
-      variableObj.maxkelvin = self.INFO.maxkelvin;
-      variableObj.maxsegments = self.INFO.maxsegments;
+			variableObj.minkelvin = self.INFO.minkelvin;
+			variableObj.maxkelvin = self.INFO.maxkelvin;
+			variableObj.maxsegments = self.INFO.maxsegments;
 			variableObj.snapshot = self.INFO.snapshot;
 			variableObj.dynamicscene = self.INFO.dynamicscene;
 			variableObj.diyscene = self.INFO.diyscene;

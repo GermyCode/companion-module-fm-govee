@@ -35,18 +35,19 @@ class goveeInstance extends InstanceBase {
 		];
 
 		this.SNAPSHOTS = [
-      { id: 'select', label: '(Select a Snapshot)' }
-    ];
+			{ id: 'select', label: '(Select a Snapshot)' }
+		];
 
 		this.DYNAMIC_SCENES = [
-      { id: 'select', label: '(Select a Scene)' }
-    ];
+			{ id: 'select', label: '(Select a Scene)' }
+		];
 
 		this.DIY_SCENES = [
-      { id: 'select', label: '(Select a Scene)' }
-    ];
+			{ id: 'select', label: '(Select a Scene)' }
+		];
 
 		this.INFO = {
+			online: false,
 			power: 'off',
 			brightness: '',
 			color: '',
@@ -54,7 +55,7 @@ class goveeInstance extends InstanceBase {
 			maxkelvin: '',
 			maxsegments: '',
 			segments: {},
-      gradienttoggle: false,
+			gradienttoggle: false,
 			snapshot: '',
 			dynamicscene: '',
 			diyscene: '',
@@ -84,6 +85,8 @@ class goveeInstance extends InstanceBase {
 
 	async configUpdated(config) {
 		this.config = config
+
+		this.config.intervalAmmount = config.intervalAmmount < 500 ? 500 : config.intervalAmmount || 60000
 
 		if (this.config.verbose) {
 			this.log('info', 'Verbose mode enabled. Log entries will contain detailed information.');
