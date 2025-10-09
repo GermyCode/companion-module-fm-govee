@@ -14,7 +14,7 @@ If your device is not found, you can manually enter its MAC address and Model nu
 
 For snapshots and scenes, you have to make them in the govee app first then they will show up here to use.
 
-### Actions
+## Actions
 
 * Turn device on, off, toggle
 * Change device brightness
@@ -27,10 +27,11 @@ For snapshots and scenes, you have to make them in the govee app first then they
 * Refresh device to get new snapshots or scenes, or just to refresh device info
 * Get debug info, for debugging purposes, use only if you know what you are doing
 
-### Segment Control
-* To specify what segments you want to change, use this formatting: '0,1,2,..'. They dont need to be consecutive. To change specific segments '0,1,6,10,..' or just '3' to change one segment
+## Segment Control
 
-### Variables
+* To specify what segments you want to change, use this formatting: 0,1,2. They dont need to be consecutive. To change specific segments 0,1,6,10 or just 3 to change one segment
+
+## Variables
 
 * Device mac
 * Device model
@@ -43,10 +44,11 @@ For snapshots and scenes, you have to make them in the govee app first then they
 * Current snapshot
 * Current dynamic and DIY scenes
 
-### Feedbacks
+## Feedbacks
 
 * Last set power state
+* Segment gradient toggle state
 
-### Presets
+## Presets
 
-*
+* General premade buttons to help with the initial page setup, or just to learn about the features
