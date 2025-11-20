@@ -1,5 +1,5 @@
 module.exports = {
-	initVariables: function () {
+	initVariables() {
 		let self = this;
 
 		let variables = [];
@@ -7,7 +7,7 @@ module.exports = {
 		variables.push({ variableId: 'device', name: 'MAC Address' })
 		variables.push({ variableId: 'sku', name: 'Model' })
 		variables.push({ variableId: 'device_name', name: 'Device Name' })
-				
+
 		variables.push({ variableId: 'power', name: 'Last Set Power State' })
 		variables.push({ variableId: 'brightness', name: 'Last Set Brightness' })
 		variables.push({ variableId: 'color', name: 'Last Set Color' })
@@ -18,12 +18,12 @@ module.exports = {
 		variables.push({ variableId: 'dynamicscene', name: 'Current Dynamic Scene' })
 		variables.push({ variableId: 'diyscene', name: 'Current DIY Scene' })
 
-		//variables.push({ variableId: 'api_calls_remaining', name: 'API Calls Remaining' })
+		variables.push({ variableId: 'api_calls_remaining', name: 'API Calls Remaining' })
 
 		self.setVariableDefinitions(variables);
 	},
 
-	checkVariables: function () {
+	checkVariables() {
 		let self = this;
 
 		try {
@@ -38,6 +38,8 @@ module.exports = {
 			variableObj.snapshot = self.INFO.snapshot;
 			variableObj.dynamicscene = self.INFO.dynamicscene;
 			variableObj.diyscene = self.INFO.diyscene;
+
+			variableObj.variableId = self.INFO.api_calls_remaining
 
 			self.setVariableValues(variableObj);
 		}

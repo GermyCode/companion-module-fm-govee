@@ -33,7 +33,7 @@ module.exports = {
 					self.INFO.power = set;
 					self.checkVariables();
 					self.checkFeedbacks();
-				}).catch((error) => {self.processError(error);});
+				}).catch((error) => {self.processHTTPError(error);});
 				if (self.config.verbose) {
 					self.log('debug', 'Setting power to ' + set);
 				}
@@ -63,7 +63,7 @@ module.exports = {
 						self.checkVariables();
 						self.checkFeedbacks();
 					}).catch((error) => {
-						self.processError(error);
+						self.processHTTPError(error);
 					});
 				} else if (brightness > 100) {
 					brightness = 100;
@@ -75,7 +75,7 @@ module.exports = {
 						self.checkVariables();
 						self.checkFeedbacks();
 					}).catch((error) => {
-						self.processError(error);
+						self.processHTTPError(error);
 					});
 				}
 				if (self.config.verbose) {
@@ -141,7 +141,7 @@ module.exports = {
 							}
 						}
 					}).catch((error) => {
-						self.processError(error);
+						self.processHTTPError(error);
 					});
 					if (self.config.verbose) {
 						self.log('debug', `Setting brightness of segments ${JSON.stringify(segArray)} to ${action.options.segbrightness}%`);
@@ -179,7 +179,7 @@ module.exports = {
 						self.checkFeedbacks()
 						self.checkVariables()
 					}).catch((error) => {
-						self.processError(error);
+						self.processHTTPError(error);
 					});
 					if (self.config.verbose) {
 						self.log('debug', 'Setting gradient toggle to ' + set);
@@ -239,7 +239,7 @@ module.exports = {
 							self.checkVariables();
 							self.checkFeedbacks();
 						}).catch((error) => {
-							self.processError(error);
+							self.processHTTPError(error);
 						});
 						for (let key in self.INFO.segments) {
 							self.INFO.segments[key].color = ''; // remove each segment's color
@@ -268,7 +268,7 @@ module.exports = {
 							self.checkVariables();
 							self.checkFeedbacks();
 						}).catch((error) => {
-							self.processError(error);
+							self.processHTTPError(error);
 						});
 					}
 					catch(error) {
@@ -340,7 +340,7 @@ module.exports = {
 							self.checkVariables();
 							self.checkFeedbacks();
 						}).catch((error) => {
-							self.processError(error);
+							self.processHTTPError(error);
 						});
 					}
 					catch(error) {
@@ -379,7 +379,7 @@ module.exports = {
 							self.checkVariables();
 							self.checkFeedbacks();
 							 self.log('debug', 'Setting snapshot to \'' + selectedSnapshot.label + '\'')
-						}).catch((error) => {self.processError(error);});
+						}).catch((error) => {self.processHTTPError(error);});
 					} else {
 						self.log('error', `Snapshot with ID ${action.options.snapshot} not found`);
 					}
@@ -460,10 +460,9 @@ module.exports = {
 			name: 'Refresh Device',
 			callback: async function (action) {
 				if (self.GOVEE_DEVICES.length > 2) {
-					let goveeDevice = self.GOVEE_DEVICES.find(device => device.id === self.GOVEE.mac);
-					if (goveeDevice) {
+					if (self.goveeDevice) {
 						self.log('debug', 'Refreshing Device');
-						self.GOVEE.getInformation(self.GOVEE.mac);
+						self.GOVEE.getInformation();
 					} else {
 						self.log('error', 'Can\'t refresh device. Device not found');
 					}

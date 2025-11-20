@@ -29,12 +29,8 @@ class GoveeLED {
 				data: data
 			};
 			axios(config)
-			.then(function (response) {
-				resolve(response.data);
-			})
-			.catch(function (error) {
-				reject(error);
-			});
+			.then((response) => resolve(response.data))
+			.catch((error) => reject(error));
 		});
 	}
 
@@ -327,31 +323,28 @@ class GoveeLED {
 	}
 
 	async getDevices() {
-		var reqData = {};
-		var endpoint = `/user/devices`;
-		let reqURL = this.basePath + endpoint;
+		return new Promise( ( resolve, reject ) => {
 
-		var data = JSON.stringify(reqData);
+			var reqData = {};
+			var endpoint = `/user/devices`;
+			let reqURL = this.basePath + endpoint;
 
-		var config = {
-			method: "get",
-			url: reqURL,
-			headers: { 
-				'Govee-API-Key': this.apiKey, 
-				'Content-Type': 'application/json'
-			},
-			data: data
-		};
+			var data = JSON.stringify(reqData);
 
-		let resData;
+			var config = {
+				method: "get",
+				url: reqURL,
+				headers: { 
+					'Govee-API-Key': this.apiKey, 
+					'Content-Type': 'application/json'
+				},
+				data: data
+			}
 
-		await axios(config).then(async function (response) {
-			resData = response.data.data;
-		}).catch(function (error) { 
-			throw new Error(error); 
-		});
-
-		return resData;
+			axios(config)
+				.then((response) => {resolve(response.data.data)})
+				.catch((error) => reject(error));
+		})
 	}
 
 	getState() {

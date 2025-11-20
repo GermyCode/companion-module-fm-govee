@@ -31,7 +31,6 @@ class goveeInstance extends InstanceBase {
 
 		this.GOVEE_DEVICES = [
 			{ id: 'select', label: 'No Devices Detected. Enter your API key, click "Save", wait a moment, and then return to this config to choose a device.' },
-			{ id: 'manual', label: 'Manually Enter Device MAC Address and Model' }
 		];
 
 		this.SNAPSHOTS = [
@@ -62,7 +61,7 @@ class goveeInstance extends InstanceBase {
 			api_calls_remaining: 5000
 		};
 
-		this.API_CALLS = []; //used to store the last 5000 API calls
+		this.API_CALLS = []; //used to store the last few API calls
 	}
 
 	async destroy() {
@@ -92,7 +91,7 @@ class goveeInstance extends InstanceBase {
 			this.log('info', 'Verbose mode enabled. Log entries will contain detailed information.');
 		}
 
-		this.updateStatus(InstanceStatus.Connecting);
+		this.updateStatus(InstanceStatus.Connecting, '');
 
 		if (this.config.api_key !== undefined && this.config.api_key !== '') {
 			this.initConnection();
@@ -106,7 +105,10 @@ class goveeInstance extends InstanceBase {
 			this.checkVariables();
 		}
 		else {
-			this.updateStatus(InstanceStatus.Connecting, 'Please enter your Govee API key.');
+			this.log('warn', 'Please enter your Govee API key.')
+			this.GOVEE_DEVICES = [
+				{ id: 'select', label: 'No Devices Detected. Enter your API key, click "Save", wait a moment, and then return to this config to choose a device.' },
+			]
 		}
 	}
 }
