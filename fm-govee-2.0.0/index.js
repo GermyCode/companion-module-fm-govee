@@ -58,7 +58,7 @@ class goveeInstance extends InstanceBase {
 			snapshot: '',
 			dynamicscene: '',
 			diyscene: '',
-			api_calls_remaining: 5000
+			api_calls_remaining: 400
 		};
 
 		this.API_CALLS = []; //used to store the last few API calls

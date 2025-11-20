@@ -8,8 +8,6 @@ You will also need to apply for an API key. This can be done with the Govee Home
 
 Once you have enabled LAN control and have your API key, enter the API key into the module config, and click "Save". The module will auto-detect the Govee devices found on your network.
 
-If your device is not found, you can manually enter its MAC address and Model number in the config.
-
 *Note:* The Govee API has rate-limits. Up to 10000 commands can be sent per day. If you attempt to do more than this, you will get an error.
 
 For snapshots and scenes, you have to make them in the govee app first then they will show up here to use.
