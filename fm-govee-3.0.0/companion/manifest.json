@@ -1,9 +1,10 @@
 {
+	"type": "connection",
 	"id": "fm-govee",
 	"name": "fm-govee",
 	"shortname": "FM-Govee",
 	"description": "Companion module for controlling Govee lights",
-	"version": "2.1.1",
+	"version": "3.0.0",
 	"license": "MIT",
 	"repository": "git+https://github.com/GermyCode/companion-module-fm-govee.git",
 	"bugs": "https://github.com/GermyCode/companion-module-fm-govee/issues",
@@ -15,9 +16,9 @@
 	],
 	"legacyIds": [],
 	"runtime": {
-		"type": "node18",
+		"type": "node22",
 		"api": "nodejs-ipc",
-		"apiVersion": "1.4.1",
+		"apiVersion": "0.0.0",
 		"entrypoint": "../index.js"
 	},
 	"manufacturer": "FM",

@@ -2,6 +2,8 @@
 
 This is an updated module of [Repository](https://github.com/bitfocus/companion-module-govee-lights). As it has been outdated with a newer API
 
+This modules repository can be found [Here](https://github.com/GermyCode/companion-module-fm-govee)
+
 This module controls most, if not all, H series Govee lights. [Supported Product Models](https://developer.govee.com/docs/support-product-model)
 
 ## To Get Started
@@ -69,6 +71,12 @@ For snapshots and scenes, you have to make them in the govee app first then they
 * General premade buttons to help with the initial page setup, or just to learn about the features
 
 ## Updates
+
+## V3.0.0
+
+* Updated to Companion API V2.0
+* added variable input to the power and brightness actions
+* and a little clean up
 
 ## V2.1.1
 

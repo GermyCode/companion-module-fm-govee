@@ -1,9 +1,9 @@
 {
 	"name": "fm-govee",
-	"version": "2.1.1",
+	"version": "3.0.0",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"build": "companion-module-build"
 	},
 	"license": "MIT",
 	"repository": {
@@ -11,11 +11,12 @@
 		"url": "git+https://github.com/GermyCode/companion-module-fm-govee.git"
 	},
 	"dependencies": {
-		"@companion-module/base": "~1.4.1",
-		"colorsys": "^1.0.22",
-    "axios": "^1.7.9"
+		"@companion-module/base": "2.0.4",
+		"axios": "^1.7.9",
+		"colorsys": "^1.0.22"
 	},
 	"devDependencies": {
-		"@companion-module/tools": "^1.2.1"
+		"@companion-module/tools": "2.7.2",
+		"eslint": "^9.36.0"
 	}
 }

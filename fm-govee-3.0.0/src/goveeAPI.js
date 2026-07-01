@@ -1,8 +1,8 @@
 // this is more up-to-date than 'node-govee-led'
 // put here because of management purposes
-const axios = require('axios');
+import axios from 'axios';
 
-class GoveeLED {
+export default class GoveeLED {
 	constructor(config) {
 		this.apiKey = config.apiKey
 		this.mac = config.mac
@@ -359,5 +359,3 @@ class GoveeLED {
 		return this.request(endpoint, reqData, "post");
 	}
 };
-
-module.exports = GoveeLED;

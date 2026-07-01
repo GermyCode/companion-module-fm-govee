@@ -1,27 +1,28 @@
-const { InstanceBase, InstanceStatus, runEntrypoint } = require('@companion-module/base')
-const UpgradeScripts = require('./src/upgrades')
+import { InstanceBase, InstanceStatus } from '@companion-module/base';
 
-const config = require('./src/config')
-const actions = require('./src/actions')
-const feedbacks = require('./src/feedbacks')
-const variables = require('./src/variables')
-const presets = require('./src/presets')
+import getConfigFields from './src/config.js';
+import initActions from './src/actions.js';
+import { initFeedbacks, checkAllFeedbacks } from './src/feedbacks.js';
+import { initVariables, checkVariables } from './src/variables.js';
+import initPresets from './src/presets.js';
 
-const api = require('./src/api')
+import initConnection from './src/main.js';
 
-class goveeInstance extends InstanceBase {
+export default class goveeInstance extends InstanceBase {
 	constructor(internal) {
-		super(internal)
+		super(internal);
 
 		// Assign the methods from the listed files to this class
 		Object.assign(this, {
-			...config,
-			...actions,
-			...feedbacks,
-			...variables,
-			...presets,
-			...api,
-		})
+			getConfigFields,
+			initActions,
+			checkAllFeedbacks,
+			initFeedbacks,
+			initVariables,
+			checkVariables,
+			initPresets,
+			initConnection,
+		});
 
 		this.INTERVAL = null; //used to poll the device
 
@@ -65,16 +66,14 @@ class goveeInstance extends InstanceBase {
 	}
 
 	async destroy() {
-		let self = this;
-
-		if (self.INTERVAL) {
-			clearInterval(self.INTERVAL);
-			self.INTERVAL = null;
+		if (this.INTERVAL) {
+			clearInterval(this.INTERVAL);
+			this.INTERVAL = null;
 		}
 
-		if (self.API_INTERVAL) {
-			clearInterval(self.API_INTERVAL);
-			self.API_INTERVAL = null;
+		if (this.API_INTERVAL) {
+			clearInterval(this.API_INTERVAL);
+			this.API_INTERVAL = null;
 		}
 	}
 
@@ -85,7 +84,19 @@ class goveeInstance extends InstanceBase {
 	async configUpdated(config) {
 		this.config = config
 
-		this.config.intervalAmmount = config.intervalAmmount < 500 ? 500 : config.intervalAmmount || 60000
+		this.config.intervalAmmount = config.intervalAmmount < 500 ? 500 : config.intervalAmmount || 60000 // clamp interval input to 500->60000ms
+
+		this.SNAPSHOTS = [
+			{ id: 'select', label: '(Select a Snapshot)' }
+		];
+
+		this.DYNAMIC_SCENES = [
+			{ id: 'select', label: '(Select a Scene)' }
+		];
+
+		this.DIY_SCENES = [
+			{ id: 'select', label: '(Select a Scene)' }
+		];
 
 		if (this.config.verbose) {
 			this.log('info', 'Verbose mode enabled. Log entries will contain detailed information.');
@@ -101,7 +112,7 @@ class goveeInstance extends InstanceBase {
 			this.initVariables();
 			this.initPresets();
 		
-			this.checkFeedbacks();
+			this.checkFeedbacks(...this.feedbackIds);
 			this.checkVariables();
 		}
 		else {
@@ -112,5 +123,3 @@ class goveeInstance extends InstanceBase {
 		}
 	}
 }
-
-runEntrypoint(goveeInstance, UpgradeScripts);
