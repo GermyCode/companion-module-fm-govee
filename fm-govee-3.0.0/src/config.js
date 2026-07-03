@@ -12,11 +12,20 @@ export default function	getConfigFields() {
 			value: 'This module controls Govee lights. See the HELP file for more information and how to get started.',
 		},
 		{
+			type: 'checkbox',
+			id: 'apitype',
+			width: '12',
+			label: 'Use Local API',
+			tooltip: 'The lan api has to be enabled on the device through the app for this to work',
+			default: false
+		},
+		{
 			type: 'textinput',
 			id: 'api_key',
 			label: 'Govee API Key',
 			width: 12,
 			default: '',
+			isVisibleExpression: '$(options:apitype) == false'
 		},
 		{
 			type: 'dropdown',
@@ -25,22 +34,16 @@ export default function	getConfigFields() {
 			width: 12,
 			default: self.GOVEE_DEVICES[0].id,
 			choices: self.GOVEE_DEVICES,
+			isVisibleExpression: '$(options:apitype) == false'
 		},
 		{
 			type: 'textinput',
-			id: 'device_mac',
-			label: 'Manually Specify Govee Device MAC Address',
+			id: 'local_api_device_ip',
+			label: 'Device IP',
 			width: 12,
 			default: '',
-			isVisibleExpression: '$(options:govee_device) == "manual"',
-		},
-		{
-			type: 'textinput',
-			id: 'model',
-			label: 'Govee Device Model',
-			width: 12,
-			default: 'H610A',
-			isVisibleExpression: '$(options:govee_device) == "manual"',
+			tooltio: 'To assign multiple devices, separate them using commas, "ip_address1,ip_address2,..."',
+			isVisibleExpression: '$(options:apitype) == true'
 		},
 		{
 			type: 'checkbox',
