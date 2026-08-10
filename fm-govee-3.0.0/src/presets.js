@@ -444,7 +444,8 @@ export default function initPresets() {
 						actionId: 'changeColor',
 						options: {
 							colortype: 'rgb',
-							colorrgb: red
+							colorrgb: red,
+							colorkelvin: 3000
 						},
 					},
 				],
@@ -470,7 +471,8 @@ export default function initPresets() {
 						actionId: 'changeColor',
 						options: {
 							colortype: 'rgb',
-							colorrgb: green
+							colorrgb: green,
+							colorkelvin: 3000
 						},
 					},
 				],
@@ -496,7 +498,8 @@ export default function initPresets() {
 						actionId: 'changeColor',
 						options: {
 							colortype: 'rgb',
-							colorrgb: blue
+							colorrgb: blue,
+							colorkelvin: 3000
 						},
 					},
 				],
@@ -522,7 +525,8 @@ export default function initPresets() {
 						actionId: 'changeColor',
 						options: {
 							colortype: 'rgb',
-							colorrgb: white
+							colorrgb: white,
+							colorkelvin: 3000
 						},
 					},
 				],
@@ -549,6 +553,7 @@ export default function initPresets() {
 						actionId: 'changeColor',
 						options: {
 							colortype: 'kelvin',
+							colorrgb: white,
 							colorkelvin: 2000
 						},
 					},
@@ -575,6 +580,7 @@ export default function initPresets() {
 						actionId: 'changeColor',
 						options: {
 							colortype: 'kelvin',
+							colorrgb: white,
 							colorkelvin: 3700
 						},
 					},
@@ -601,6 +607,7 @@ export default function initPresets() {
 						actionId: 'changeColor',
 						options: {
 							colortype: 'kelvin',
+							colorrgb: white,
 							colorkelvin: 5500
 						},
 					},
@@ -627,6 +634,7 @@ export default function initPresets() {
 						actionId: 'changeColor',
 						options: {
 							colortype: 'kelvin',
+							colorrgb: white,
 							colorkelvin: 7200
 						},
 					},
@@ -653,6 +661,7 @@ export default function initPresets() {
 						actionId: 'changeColor',
 						options: {
 							colortype: 'kelvin',
+							colorrgb: white,
 							colorkelvin: 9000
 						},
 					},
