@@ -94,7 +94,7 @@ export default function	initActions() {
 		],
 		callback: async (action) => {
 			const raw = action.options.brightness
-			const brightness = Number(String(raw).trim())
+			let brightness = Number(String(raw).trim())
 
 			if (!Number.isFinite(brightness)) {
 				this.log('warn', `Invalid brightness: ${raw}`)
